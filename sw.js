@@ -1,4 +1,4 @@
-const V = "kritzel-v7";
+const V = "kritzel-v8";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(V).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => {
@@ -7,7 +7,7 @@ self.addEventListener("activate", e => {
 });
 // Netz zuerst (damit Updates ankommen), Cache als Rückfall (damit es offline läuft)
 self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
+  if (e.request.method !== "GET" || new URL(e.request.url).search) return;
   e.respondWith(fetch(e.request,{cache:"reload"}).then(r => { const c = r.clone(); caches.open(V).then(x => x.put(e.request, c)); return r; })
     .catch(() => caches.match(e.request)));
 });

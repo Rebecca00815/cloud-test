@@ -315,8 +315,22 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 /* ---------- Speichern ---------- */
 let saveT=0;
 const hhmm=()=>new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
-const VERSION="v7";
-const setStatus=t=>{$("status").textContent=(t?t+" · ":"")+VERSION+" · Diagnose";};
+const VERSION="v8";let newV="";
+const setStatus=t=>{$("status").textContent=newV?"Update "+newV+" bereit: hier tippen":(t?t+" · ":"")+VERSION+" · Diagnose";};
+/* Prüft beim Start und beim Zurückkehren, ob es eine neuere Version gibt */
+async function checkUpdate(){
+  try{
+    const t=await (await fetch("index.html?_="+Date.now(),{cache:"no-store"})).text();
+    const m=t.match(/const VERSION="(v\d+)"/);
+    if(m&&m[1]!==VERSION){newV=m[1];setStatus("");}
+  }catch(e){}
+}
+async function applyUpdate(){
+  try{for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister();}catch(e){}
+  try{for(const k of await caches.keys())await caches.delete(k);}catch(e){}
+  if(saveT)await save(true);
+  location.reload();
+}
 function touch(){if(!S.note)return;S.note.updated=Date.now();clearTimeout(saveT);saveT=setTimeout(()=>save(false),1200);setStatus("…");}
 function thumb(n){const k=320/W_LOGICAL;return compose(320,220,k,0,n.strokes,n.paper).toDataURL("image/jpeg",.7);}
 async function save(full){
@@ -325,7 +339,7 @@ async function save(full){
   catch(e){setStatus("Fehler: Speichern klappt nicht");}
 }
 addEventListener("pagehide",()=>{if(saveT)save(true);});
-document.addEventListener("visibilitychange",()=>{if(document.hidden&&saveT)save(true);});
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&saveT)save(true);if(!document.hidden)checkUpdate();});
 
 /* ---------- Notizen ---------- */
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -578,7 +592,7 @@ const toggleDiag=()=>{
     $("dlg").close();}
   $("diag").textContent=on?"Diagnose aus":"Diagnose";
 };
-$("diag").onclick=toggleDiag;$("status").onclick=toggleDiag;
+$("diag").onclick=toggleDiag;$("status").onclick=()=>{newV?applyUpdate():toggleDiag();};
 
 /* ---------- Start ---------- */
 (async()=>{
@@ -588,6 +602,7 @@ $("diag").onclick=toggleDiag;$("status").onclick=toggleDiag;
   const n=notes.find(x=>x.id===last)||notes.sort((a,b)=>b.updated-a.updated)[0]||newNote();
   await openNote(n);
   if(!notes.length)save();
+  checkUpdate();
 })();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{});
 </script>

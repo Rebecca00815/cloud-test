@@ -12,18 +12,14 @@ Notizen mit dem Apple Pencil, im Nord-Look. Eine einzelne Web-App (`index.html`)
 
 - **Stifte:** Fineliner, Kuli (druckempfindlich), Marker (halbtransparent, liegt unter der Tinte), Radierer (löscht ganze Striche).
 - **Fünf Stiftbreiten** je Stift, **zehn Farben**: Nachtgrau, Schiefergrau, Frost-Töne, Navy, Kronen-Rot, Neongelb, Hellgrau.
-- **Papier:** Punkte (Standard), Liniert, Kariert, Blanko. Das Papier bleibt immer hell.
+- **Papier:** Punkte (Standard), Reinweiß, Liniert, Kariert. Die letzte Wahl gilt für neue Notizen. Das Papier bleibt immer hell.
 - **Pencil malt, Finger scrollt.** Schalter „Finger: malt" für den Notfall.
 - Zurück / Vor, endlos lange Seiten, mehrere Notizen, automatisches Speichern auf dem Gerät (IndexedDB).
 - **PNG-Export** über das iPad-Teilen-Menü.
 
-## Handschrift in Text umwandeln
+## Handschrift in Text
 
-Die Handschrift bleibt immer erhalten. Der Text kommt **zusätzlich als Objekt auf die Seite**, kein extra Feld.
-
-1. Werkzeug **Auswahl → Text** wählen, mit dem Pencil einen Rahmen um die Handschrift ziehen. Das Bild geht an die Claude-API, der erkannte Text erscheint direkt unter dem Rahmen. Dafür ist ein eigener Anthropic-API-Schlüssel nötig. Er wird einmal abgefragt und nur im Browser des iPads gespeichert. Ändern oder löschen unter Notizen, **API-Schlüssel**.
-2. Mit demselben Werkzeug: Text **ziehen** verschiebt ihn, **antippen** öffnet ihn zum Bearbeiten (dort funktioniert auch Scribble), eine **leere Stelle antippen** legt einen neuen Text an.
-3. Der Radierer löscht auch Text, Zurück/Vor gilt für Text genauso. Text steht auch in PNG und PDF.
+Die App selbst wandelt nichts um und kostet nichts. Wer die Schrift transkribiert haben will: Notiz als **PDF** oder **PNG** exportieren und in einem Chat mit Claude hochladen (im bestehenden Claude-Abo enthalten, keine zusätzlichen Kosten) mit der Bitte, sie wortgetreu abzutippen.
 
 ## Grenzen (ehrlich)
 

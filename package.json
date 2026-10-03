@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac --arm64 --x64"
+    "dist": "electron-builder --mac --arm64 --x64 --publish never"
   },
   "build": {
     "appId": "de.rebecca.morsegenerator",

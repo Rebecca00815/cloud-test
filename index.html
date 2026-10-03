@@ -334,7 +334,7 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 
 /* ---------- Speichern ---------- */
 let saveT=0;
-const VERSION="v13";let newV="";
+const VERSION="v14";let newV="";
 const setStatus=t=>{$("status").textContent=newV?"Update bereit: hier tippen":(t||"");};
 /* Prüft beim Start und beim Zurückkehren, ob es eine neuere Version gibt */
 async function checkUpdate(){
@@ -526,16 +526,25 @@ function clearTail(){
   if(!cur||!cur.tb)return;const m=cur.s.w+6,b=cur.tb;
   tipX.clearRect(b[0]-m,b[1]-m,b[2]-b[0]+2*m,b[3]-b[1]+2*m);cur.tb=null;
 }
-const PRED_MS=18,PRED_CAP=36;
+const PRED_MS=12,PRED_CAP=18;
+/* Vorhersage nur bei ruhiger, gerader Bewegung: bei Kurven, Wendungen und kleiner Schrift
+   (Buchstaben!) wird sie abgeschaltet, sonst flattert die Spitze. */
 function predictPoint(){
-  const h=cur.hist,n=h.length/3;if(n<2)return null;
-  const x=h[(n-1)*3],y=h[(n-1)*3+1],t=h[(n-1)*3+2];
-  let i=n-2;while(i>0&&t-h[i*3+2]<10)i--;
-  const dt=t-h[i*3+2];if(dt<=0)return null;
-  let ax=(x-h[i*3])/dt*PRED_MS,ay=(y-h[i*3+1])/dt*PRED_MS;const l=Math.hypot(ax,ay);
+  const h=cur.hist,n=h.length/3,L=n-1;if(n<4)return damp();
+  const tt=k=>h[k*3+2];let i=L-1;while(i>0&&tt(L)-tt(i)<16)i--;
+  let j=i-1;while(j>0&&tt(i)-tt(j)<16)j--;
+  const d1=tt(L)-tt(i),d0=tt(i)-tt(j);if(d1<=0||d0<=0||i===j)return damp();
+  const v1x=(h[L*3]-h[i*3])/d1,v1y=(h[L*3+1]-h[i*3+1])/d1,v0x=(h[i*3]-h[j*3])/d0,v0y=(h[i*3+1]-h[j*3+1])/d0;
+  const s1=Math.hypot(v1x,v1y),s0=Math.hypot(v0x,v0y);
+  if(s1<.3||s0<.3)return damp();
+  const cos=(v1x*v0x+v1y*v0y)/(s1*s0),k=Math.max(0,(cos-.85)/.15);   // 1 = gerade, 0 = Richtungswechsel
+  const ratio=Math.min(s1,s0)/Math.max(s1,s0),f=k*ratio*ratio;
+  let ax=v1x*PRED_MS*f,ay=v1y*PRED_MS*f;const l=Math.hypot(ax,ay);
   if(l>PRED_CAP){ax*=PRED_CAP/l;ay*=PRED_CAP/l;}
-  return[x+ax,y+ay];
+  const pv=cur.pv||(cur.pv=[0,0]);pv[0]=pv[0]*.5+ax*.5;pv[1]=pv[1]*.5+ay*.5;
+  return[h[L*3]+pv[0],h[L*3+1]+pv[1]];
 }
+function damp(){const pv=cur.pv||(cur.pv=[0,0]);pv[0]*=.4;pv[1]*=.4;const h=cur.hist,L=h.length/3-1;return L<0?null:[h[L*3]+pv[0],h[L*3+1]+pv[1]];}
 function drawTail(pred=true){
   const s=cur.s,p=s.p,n=p.length/3;if(s.t==="marker"||n<2)return;
   clearTail();const x=p[(n-1)*3],y=p[(n-1)*3+1],pp=pred?predictPoint():null;

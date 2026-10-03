@@ -459,15 +459,15 @@ inkC.addEventListener("pointerdown",e=>{
     if(ts||e.pointerType==="mouse")return;
     cancelAnimationFrame(inertia);ts={id:e.pointerId,y:e.clientY,t:e.timeStamp,v:0};inkC.setPointerCapture(e.pointerId);return;
   }
-  if(cur)return;
-  e.preventDefault();inkC.setPointerCapture(e.pointerId);
+  if(cur)finishCur();
+  e.preventDefault();try{inkC.setPointerCapture(e.pointerId);}catch(_){}
   const d=TOOLS[S.tool],[x,y]=pos(e);
   if(d.type==="select"){
-    const r=stage.getBoundingClientRect();cur={id:e.pointerId,select:true,x0:e.clientX-r.left,y0:e.clientY-r.top,x1:0,y1:0};cur.x1=cur.x0;cur.y1=cur.y0;drawSel();return;
+    const r=stage.getBoundingClientRect();cur={id:e.pointerId,pt:e.pointerType,select:true,x0:e.clientX-r.left,y0:e.clientY-r.top,x1:0,y1:0};cur.x1=cur.x0;cur.y1=cur.y0;drawSel();return;
   }
-  if(d.type==="erase"){cur={id:e.pointerId,erase:true,r:d.base[S.wIdx]/2,hit:false};cur.hit=eraseAt(x,y,cur.r);showRing(e,true);if(cur.hit)redraw();return;}
+  if(d.type==="erase"){cur={id:e.pointerId,pt:e.pointerType,erase:true,r:d.base[S.wIdx]/2,hit:false};cur.hit=eraseAt(x,y,cur.r);showRing(e,true);if(cur.hit)redraw();return;}
   const ctx=d.layer==="mk"?mkX:inkX;applyTransform();
-  cur={id:e.pointerId,ctx,ps:null,lx:x,ly:y,s:{t:d.type,c:S.color,w:d.base[S.wIdx],k:d.k,p:[],bb:[x,y,x,y]}};
+  cur={id:e.pointerId,pt:e.pointerType,ctx,ps:null,lx:x,ly:y,s:{t:d.type,c:S.color,w:d.base[S.wIdx],k:d.k,p:[],bb:[x,y,x,y]}};
   addPoint(e);
 });
 inkC.addEventListener("pointermove",e=>{
@@ -476,7 +476,7 @@ inkC.addEventListener("pointermove",e=>{
     setScroll(S.scrollY-dy/S.scale);return;
   }
   if(!cur){if(e.pointerType!=="touch")showRing(e,true);return;}
-  if(e.pointerId!==cur.id)return;
+  if(e.pointerType!==cur.pt)return;
   e.preventDefault();
   if(cur.select){const r=stage.getBoundingClientRect();cur.x1=e.clientX-r.left;cur.y1=e.clientY-r.top;drawSel();return;}
   if(cur.erase){
@@ -484,8 +484,6 @@ inkC.addEventListener("pointermove",e=>{
     showRing(e,true);if(cur.hit)redraw();return;
   }
   for(const c of (e.getCoalescedEvents?e.getCoalescedEvents():[e]))addPoint(c);
-  const bottom=S.scrollY+S.H/S.scale;
-  if(cur.s.bb[3]>bottom-40)redraw();
 });
 function up(e){
   if(ts&&e.pointerId===ts.id){
@@ -493,12 +491,21 @@ function up(e){
     const step=()=>{v*=.95;if(Math.abs(v)<.02)return;setScroll(S.scrollY-v*16/S.scale);inertia=requestAnimationFrame(step);};
     inertia=requestAnimationFrame(step);return;
   }
-  if(!cur||e.pointerId!==cur.id)return;
-  if(cur.select){const c=cur;cur=null;$("sel").style.display="none";convertRegion(c);return;}
-  if(cur.erase){if(cur.hit)commit();}else endStroke();
-  cur=null;if(e.pointerType==="touch"||e.type==="pointercancel")showRing(e,false);
+  if(!cur||e.pointerType!==cur.pt)return;
+  finishCur();
+  if(e.pointerType==="touch"||e.type==="pointercancel")showRing(e,false);
+}
+function finishCur(){
+  const c=cur;cur=null;if(!c)return;
+  if(c.select){$("sel").style.display="none";convertRegion(c);return;}
+  if(c.erase){if(c.hit)commit();return;}
+  cur=c;endStroke();cur=null;
 }
 inkC.addEventListener("pointerup",up);inkC.addEventListener("pointercancel",up);
+inkC.addEventListener("lostpointercapture",up);
+addEventListener("pointerup",up);addEventListener("pointercancel",up);
+/* iOS: Touch-Standardverhalten auf der Zeichenfläche abschalten, sonst verschluckt Safari Pencil-Striche */
+for(const ev of ["touchstart","touchmove"])stage.addEventListener(ev,e=>{if(e.cancelable)e.preventDefault();},{passive:false});
 inkC.addEventListener("pointerleave",e=>{if(!cur)showRing(e,false);});
 stage.addEventListener("wheel",e=>{e.preventDefault();setScroll(S.scrollY+e.deltaY/S.scale);},{passive:false});
 stage.addEventListener("contextmenu",e=>e.preventDefault());

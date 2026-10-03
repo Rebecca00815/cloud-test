@@ -315,7 +315,7 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 /* ---------- Speichern ---------- */
 let saveT=0;
 const hhmm=()=>new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
-const VERSION="v6";
+const VERSION="v7";
 const setStatus=t=>{$("status").textContent=(t?t+" · ":"")+VERSION+" · Diagnose";};
 function touch(){if(!S.note)return;S.note.updated=Date.now();clearTimeout(saveT);saveT=setTimeout(()=>save(false),1200);setStatus("…");}
 function thumb(n){const k=320/W_LOGICAL;return compose(320,220,k,0,n.strokes,n.paper).toDataURL("image/jpeg",.7);}
@@ -484,6 +484,7 @@ inkC.addEventListener("pointerdown",e=>{
   if(d.type==="erase"){cur={id:e.pointerId,pt:e.pointerType,erase:true,r:d.base[S.wIdx]/2,hit:false};cur.hit=eraseAt(x,y,cur.r);showRing(e,true);if(cur.hit)redraw();return;}
   const ctx=d.layer==="mk"?mkX:inkX;applyTransform();
   cur={id:e.pointerId,pt:e.pointerType,ctx,ps:null,lx:x,ly:y,s:{t:d.type,c:S.color,w:d.base[S.wIdx],k:d.k,p:[],bb:[x,y,x,y]}};
+  ctx.strokeStyle=ctx.fillStyle=S.color;ctx.lineCap=ctx.lineJoin="round";
   addPoint(e);
 });
 inkC.addEventListener("pointermove",e=>{

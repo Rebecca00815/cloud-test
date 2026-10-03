@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kritzel Block">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ECEFF4">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Kritzel Block</title>
+<style>
+/* Designvorlage „Nord“ (Rebecca Mahnkopf) für Apps, Websites und Oberflächen.
+   Gleiche Optik wie die Druck-Vorlage (vorlage.html), übersetzt auf den Bildschirm.
+   Tokens unverändert übernehmen, Bausteine nach Bedarf. Dunkel ist die abgeleitete Variante. */
+:root{
+  --ink:#2E3440;   /* Polar Night: Schrift, Linien, dunkle Kästen */
+  --ink2:#4C566A;  /* Polar Night hell: Fließtext in Karten, Untertitel */
+  --snow:#ECEFF4;  /* Snow Storm: Kartenhintergrund, Schrift auf Dunkel */
+  --snow2:#E5E9F0;
+  --frost1:#8FBCBB;--frost2:#88C0D0;--frost3:#81A1C1;--frost4:#5E81AC; /* Frost: Akzente */
+  --line:#D8DEE9;
+  --bg:#fff;
+  --radius:10px;
+  --font:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2E3440; --ink:#ECEFF4; --ink2:#D8DEE9; --snow:#3B4252; --snow2:#434C5E; --line:#4C566A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2E3440; --ink:#ECEFF4; --ink2:#D8DEE9; --snow:#3B4252; --snow2:#434C5E; --line:#4C566A;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45}
+.wrap{max-width:960px;margin:0 auto;padding:24px 16px}
+
+/* Kopf: Titel mit zweitem Wort in Frost-Blau, Kontext rechts, kräftige Linie */
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:24px}
+h1{font-size:32px;font-weight:700;letter-spacing:-.4px}
+h1 span{color:var(--frost4)}
+.sub{font-size:13px;color:var(--ink2);text-align:right}
+
+/* Abschnittsüberschrift: klein, VERSALIEN, gesperrt, Frost-Blau */
+h2{font-size:12px;text-transform:uppercase;letter-spacing:1.6px;color:var(--frost4);font-weight:700;margin:0 0 10px}
+section{margin-bottom:24px}
+
+/* Raster und Karten: Snow-Hintergrund, abgerundet, farbige Kante links */
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.card{background:var(--snow);border-radius:var(--radius);padding:12px 16px;border-left:5px solid var(--frost3)}
+.card.f1{border-left-color:var(--frost1)}.card.f2{border-left-color:var(--frost2)}.card.f4{border-left-color:var(--frost4)}.card.dark{border-left-color:var(--ink)}
+.card p{color:var(--ink2)}
+.card p + p{margin-top:6px}
+.stack > * + *{margin-top:12px}
+
+/* Stichwort in Schreibmaschinenschrift */
+.k{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--ink);display:block;margin-bottom:4px}
+.k small{font-family:var(--font);font-weight:500;font-size:12px;color:var(--ink2);margin-left:6px}
+
+/* Regel-Kasten: dunkel, sparsam */
+.rule{background:#2E3440;color:#ECEFF4;border-radius:var(--radius);padding:12px 16px;font-size:14px;margin-bottom:12px}
+.rule b{color:var(--frost2)}
+
+/* Listen, Checkliste, Tabelle */
+ol,ul{padding-left:20px;color:var(--ink2)} li{margin:2px 0}
+b{color:var(--ink)}
+.check li{list-style:none;position:relative;padding-left:4px}
+.check li::before{content:"";position:absolute;left:-20px;top:4px;width:12px;height:12px;border:1.5px solid var(--frost4);border-radius:3px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--frost4);border-bottom:1.5px solid var(--ink);padding:8px}
+td{padding:8px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+td:first-child{color:var(--ink);font-weight:600}
+
+/* Bedienelemente */
+button,.btn{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:var(--radius);padding:10px 18px;background:var(--frost4);color:#fff}
+button:hover,.btn:hover{background:var(--frost3)}
+button.secondary{background:var(--snow);color:var(--ink);border-left:5px solid var(--frost3);border-radius:var(--radius)}
+button.dark{background:#2E3440;color:#ECEFF4}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--frost2);outline-offset:2px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--snow);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;width:100%}
+label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--frost4);font-weight:700;margin:0 0 4px}
+a{color:var(--frost4)}
+
+/* Fuß: dünne Linie, links Quelle, rechts ein trockener Satz */
+footer{margin-top:32px;border-top:1px solid var(--line);padding-top:8px;font-size:12px;color:var(--ink2);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+
+/* ---------- App-Gerüst (aus denselben Tokens abgeleitet) ---------- */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+body{position:fixed;inset:0;display:flex;flex-direction:column}
+header{margin:0;align-items:center;flex-wrap:wrap;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))}
+h1{font-size:24px;white-space:nowrap}
+header input{flex:1 1 140px;width:auto;max-width:340px;min-height:44px;-webkit-user-select:text;user-select:text}
+.acts,.tools,.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.acts{margin-left:auto}
+button,select{min-height:44px;font-size:14px}
+button{padding:0 14px}
+button:disabled{opacity:.4;cursor:default}
+select{width:auto;padding:0 10px;font-weight:600;color:var(--ink);background:var(--snow);border-left:5px solid var(--frost3)}
+.tools{padding:8px max(16px,env(safe-area-inset-right)) 8px max(16px,env(safe-area-inset-left));border-bottom:1px solid var(--line);gap:8px 20px}
+.grp{gap:6px}
+.tool{background:var(--snow);color:var(--ink);border-left:5px solid var(--frost3);font-family:var(--mono);font-weight:700}
+.tool:hover{background:var(--snow2)}
+.tool[aria-pressed="true"],.tool[aria-pressed="true"]:hover{background:var(--frost4);color:#fff;border-left-color:var(--ink)}
+.w{width:44px;padding:0;display:grid;place-items:center;background:var(--snow);border-radius:var(--radius)}
+.w:hover{background:var(--snow2)}
+.w i{display:block;border-radius:50%;background:var(--ink)}
+.w[aria-pressed="true"]{background:var(--snow2);box-shadow:inset 0 -3px 0 var(--frost4)}
+.sw{width:44px;padding:0;background:transparent;display:grid;place-items:center;border-radius:var(--radius)}
+.sw:hover{background:var(--snow2)}
+.sw i{display:block;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--ink2)}
+.sw[aria-pressed="true"]{background:var(--snow2);box-shadow:inset 0 -3px 0 var(--frost4)}
+.sw[aria-pressed="true"] i{outline:2px solid var(--ink);outline-offset:2px}
+#status{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+/* Papier bleibt immer hell, auch im Dunkelmodus (wie echtes Papier) */
+#work{flex:1;display:flex;min-height:0;position:relative}
+#txt{display:none;flex-direction:column;gap:10px;width:340px;padding:16px max(16px,env(safe-area-inset-right)) 16px 16px;border-left:2px solid var(--ink);background:var(--bg);-webkit-user-select:text;user-select:text}
+#txt.on{display:flex}
+#txt textarea{flex:1;resize:none;min-height:120px;line-height:1.5;-webkit-user-select:text;user-select:text}
+#txt .row{display:flex;gap:8px}
+#sel{position:absolute;display:none;border:2px dashed var(--frost4);background:rgba(136,192,208,.18);pointer-events:none;border-radius:4px}
+#stage{flex:1;min-width:0;position:relative;overflow:hidden;background-color:#fff;touch-action:none;cursor:crosshair}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#mk{opacity:.4;mix-blend-mode:multiply}
+#ring{position:absolute;pointer-events:none;border:1.5px solid var(--frost4);border-radius:50%;display:none;transform:translate(-50%,-50%);background:rgba(94,129,172,.12)}
+/* Notizen-Übersicht */
+dialog{border:0;border-radius:var(--radius);background:var(--bg);color:var(--ink);width:min(920px,94vw);max-height:86vh;padding:0;overflow:auto;-webkit-user-select:none}
+dialog::backdrop{background:rgba(46,52,64,.6)}
+dialog header{position:sticky;top:0;background:var(--bg);padding:16px;z-index:1}
+.dlg{padding:16px}
+#list{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.note{padding:0;overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+.note img{display:block;width:100%;aspect-ratio:320/220;object-fit:cover;background:#fff;border-bottom:1px solid var(--line)}
+.note .meta{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.note .k{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.note .meta small{display:block;font-size:12px;color:var(--ink2)}
+.note.on{border-left-color:var(--frost4);outline:2px solid var(--frost2)}
+.note button{min-height:44px}
+.empty{color:var(--ink2);padding:24px 0}
+@media (max-width:820px){#txt.on{position:absolute;right:0;top:0;bottom:0;width:min(340px,86vw);z-index:5}}
+@media (max-width:700px){h1{font-size:20px}header input{order:3;flex-basis:100%;max-width:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Kritzel <span>Block</span></h1>
+  <input id="title" aria-label="Titel der Notiz" placeholder="Ohne Titel" maxlength="80" autocomplete="off">
+  <div class="acts">
+    <button class="secondary" id="undo" aria-label="Rückgängig">↶ Zurück</button>
+    <button class="secondary" id="redo" aria-label="Wiederholen">Vor ↷</button>
+    <select id="paper" aria-label="Papier">
+      <option value="blank">Blanko</option>
+      <option value="lined">Liniert</option>
+      <option value="grid">Kariert</option>
+      <option value="dots">Punkte</option>
+    </select>
+    <button class="secondary" id="finger" aria-pressed="false">Finger: scrollt</button>
+    <button class="secondary" id="export">PNG</button>
+    <button class="secondary" id="txtbtn" aria-pressed="false">Text</button>
+    <button id="notes">Notizen</button>
+  </div>
+</header>
+<nav class="tools" aria-label="Werkzeuge">
+  <div class="grp" id="tools" role="group" aria-label="Stift"></div>
+  <div class="grp" id="widths" role="group" aria-label="Stiftbreite"></div>
+  <div class="grp" id="colors" role="group" aria-label="Farbe"></div>
+  <span id="status" aria-live="polite"></span>
+</nav>
+<div id="work">
+<main id="stage">
+  <canvas id="mk"></canvas>
+  <canvas id="ink"></canvas>
+  <div id="ring"></div>
+  <div id="sel"></div>
+</main>
+<aside id="txt" aria-label="Text zur Notiz">
+  <h2>Text zur Notiz</h2>
+  <textarea id="txtarea" placeholder="Hier tippen oder mit dem Pencil schreiben (iPadOS Scribble wandelt es um). Oder mit dem Werkzeug „Auswahl“ Handschrift einrahmen." aria-label="Text"></textarea>
+  <div class="row">
+    <button class="secondary" id="txtcopy">Kopieren</button>
+    <button class="secondary" id="txtkey">API-Schlüssel</button>
+  </div>
+</aside>
+</div>
+
+<dialog id="dlg">
+  <header>
+    <h1>Deine <span>Notizen</span></h1>
+    <div class="acts"><button id="newnote">Neue Notiz</button><button class="secondary" id="close">Schließen</button></div>
+  </header>
+  <div class="dlg"><div class="grid g3" id="list"></div></div>
+</dialog>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const W_LOGICAL=1000, SP=36;               // feste logische Seitenbreite, Rasterabstand
+const COLORS=[["#2E3440","Nachtgrau"],["#5E81AC","Frostblau"],["#81A1C1","Hellblau"],["#88C0D0","Eisblau"],["#8FBCBB","Mintgrün"],
+              ["#BF616A","Rot"],["#D08770","Orange"],["#EBCB8B","Gelb"],["#A3BE8C","Grün"],["#B48EAD","Violett"]];
+const TOOLS={
+  fine:  {label:"Fineliner",type:"fine",  base:[1.2,2.2,3.5,5.5,8],  k:.12,layer:"ink",disp:2.4},
+  ball:  {label:"Kuli",     type:"ball",  base:[1.2,2.2,3.5,5.5,8],  k:.55,layer:"ink",disp:2.4},
+  marker:{label:"Marker",   type:"marker",base:[8,12,18,26,36],      k:0,  layer:"mk", disp:.6},
+  select:{label:"Auswahl → Text",type:"select",base:[1],k:0,layer:null,disp:1},
+  erase: {label:"Radierer", type:"erase", base:[10,18,28,44,64],     k:0,  layer:null, disp:.4}
+};
+const S={note:null,tool:"fine",color:"#2E3440",wIdx:2,finger:false,scrollY:0,scale:1,dpr:1,W:0,H:0};
+try{Object.assign(S,JSON.parse(localStorage.getItem("kritzel.prefs")||"{}"));}catch(e){}
+S.scrollY=0;
+const savePrefs=()=>{try{localStorage.setItem("kritzel.prefs",JSON.stringify({tool:S.tool,color:S.color,wIdx:S.wIdx,finger:S.finger}));}catch(e){}};
+
+/* ---------- Speicher (IndexedDB) ---------- */
+const DB=new Promise((res,rej)=>{const r=indexedDB.open("kritzel",1);r.onupgradeneeded=()=>r.result.createObjectStore("notes",{keyPath:"id"});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+const tx=async(mode,fn)=>{const db=await DB;return new Promise((res,rej)=>{const t=db.transaction("notes",mode);const rq=fn(t.objectStore("notes"));t.oncomplete=()=>res(rq&&rq.result);t.onerror=()=>rej(t.error);});};
+const dbAll=()=>tx("readonly",s=>s.getAll()),dbPut=n=>tx("readwrite",s=>s.put(n)),dbDel=id=>tx("readwrite",s=>s.delete(id));
+
+/* ---------- Zeichnen ---------- */
+const mkC=$("mk"),inkC=$("ink"),stage=$("stage"),ring=$("ring");
+const mkX=mkC.getContext("2d"),inkX=inkC.getContext("2d");
+const wd=(s,i)=>s.w*(1-s.k+s.k*2*s.p[i*3+2]);
+function segPath(ctx,s,i,fx,fy,tx,ty){
+  ctx.lineWidth=i?(wd(s,i-1)+wd(s,i))/2:wd(s,0);
+  ctx.beginPath();ctx.moveTo(fx,fy);ctx.quadraticCurveTo(s.p[i*3],s.p[i*3+1],tx,ty);ctx.stroke();
+}
+function drawStroke(ctx,s){
+  const p=s.p,n=p.length/3;
+  ctx.strokeStyle=ctx.fillStyle=s.c;ctx.lineCap=ctx.lineJoin="round";
+  if(n===1){ctx.beginPath();ctx.arc(p[0],p[1],wd(s,0)/2,0,7);ctx.fill();return;}
+  let fx=p[0],fy=p[1];
+  for(let i=1;i<n;i++){
+    const last=i===n-1,tx=last?p[i*3]:(p[i*3]+p[i*3+3])/2,ty=last?p[i*3+1]:(p[i*3+1]+p[i*3+4])/2;
+    segPath(ctx,s,i,fx,fy,tx,ty);fx=tx;fy=ty;
+  }
+}
+function drawPaper(x,paper,wl,hl,offY){
+  if(paper==="blank")return;
+  x.save();x.lineWidth=1.2;x.strokeStyle="#D8DEE9";x.fillStyle="#B8C0D0";
+  const y0=Math.max(1,Math.floor(offY/SP)),y1=Math.ceil((offY+hl)/SP);
+  if(paper==="lined"||paper==="grid"){for(let m=y0;m<=y1;m++){x.beginPath();x.moveTo(0,m*SP);x.lineTo(wl,m*SP);x.stroke();}}
+  if(paper==="grid"){for(let m=1;m*SP<wl;m++){x.beginPath();x.moveTo(m*SP,offY);x.lineTo(m*SP,offY+hl);x.stroke();}}
+  if(paper==="dots"){for(let a=0;a*SP<wl;a++)for(let m=y0-1;m<=y1;m++){x.beginPath();x.arc((a+.5)*SP,(m+.5)*SP,1.5,0,7);x.fill();}}
+  x.restore();
+}
+function compose(w,h,k,offY,strokes,paper){
+  const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");
+  x.fillStyle="#fff";x.fillRect(0,0,w,h);
+  x.setTransform(k,0,0,k,0,-offY*k);drawPaper(x,paper,w/k,h/k,offY);
+  const mk=strokes.filter(s=>s.t==="marker");
+  if(mk.length){
+    const t=document.createElement("canvas");t.width=w;t.height=h;const y=t.getContext("2d");
+    y.setTransform(k,0,0,k,0,-offY*k);mk.forEach(s=>drawStroke(y,s));
+    x.save();x.setTransform(1,0,0,1,0,0);x.globalAlpha=.4;x.globalCompositeOperation="multiply";x.drawImage(t,0,0);x.restore();
+  }
+  strokes.forEach(s=>s.t!=="marker"&&drawStroke(x,s));
+  return c;
+}
+const contentBottom=()=>S.note.strokes.reduce((m,s)=>Math.max(m,s.bb[3]),0);
+const maxScroll=()=>Math.max(0,contentBottom()-S.H/S.scale*.25);
+
+function applyTransform(){
+  const k=S.dpr*S.scale;
+  for(const c of [mkX,inkX])c.setTransform(k,0,0,k,0,-S.scrollY*k);
+}
+let raf=0;
+function redraw(){
+  if(raf)return;
+  raf=requestAnimationFrame(()=>{
+    raf=0;if(!S.note)return;
+    applyTransform();
+    for(const c of [mkX,inkX]){c.save();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,mkC.width,mkC.height);c.restore();}
+    const top=S.scrollY,bot=S.scrollY+S.H/S.scale;
+    for(const s of S.note.strokes){
+      if(s.bb[3]<top||s.bb[1]>bot)continue;
+      drawStroke(s.t==="marker"?mkX:inkX,s);
+    }
+    paperBg();
+  });
+}
+function paperBg(){
+  const sp=SP*S.scale,off=-S.scrollY*S.scale,p=S.note.paper,st=stage.style;
+  const L="#D8DEE9";
+  st.backgroundImage="none";
+  if(p==="lined"){st.backgroundImage=`linear-gradient(to bottom,transparent calc(100% - 1.2px),${L} 0)`;st.backgroundSize=`100% ${sp}px`;st.backgroundPosition=`0 ${off}px`;}
+  if(p==="grid"){st.backgroundImage=`linear-gradient(to right,transparent calc(100% - 1.2px),${L} 0),linear-gradient(to bottom,transparent calc(100% - 1.2px),${L} 0)`;st.backgroundSize=`${sp}px ${sp}px`;st.backgroundPosition=`0 ${off}px`;}
+  if(p==="dots"){st.backgroundImage=`radial-gradient(circle,#B8C0D0 ${1.5*S.scale}px,transparent ${1.8*S.scale}px)`;st.backgroundSize=`${sp}px ${sp}px`;st.backgroundPosition=`0 ${off}px`;}
+}
+function resize(){
+  S.W=stage.clientWidth;S.H=stage.clientHeight;S.dpr=Math.min(window.devicePixelRatio||1,2);S.scale=S.W/W_LOGICAL;
+  for(const c of [mkC,inkC]){c.width=Math.round(S.W*S.dpr);c.height=Math.round(S.H*S.dpr);}
+  if(S.note){S.scrollY=Math.min(S.scrollY,maxScroll());redraw();}
+}
+new ResizeObserver(resize).observe(stage);
+function setScroll(y){S.scrollY=Math.max(0,Math.min(y,maxScroll()));redraw();}
+
+/* ---------- Verlauf (Rückgängig / Wiederholen) ---------- */
+let hist=[],hi=0;
+function resetHist(){hist=[S.note.strokes.slice()];hi=0;updUndo();}
+function commit(){hist.splice(hi+1);hist.push(S.note.strokes.slice());if(hist.length>150)hist.shift();hi=hist.length-1;updUndo();touch();}
+function undo(){if(hi>0){hi--;S.note.strokes=hist[hi].slice();updUndo();redraw();touch();}}
+function redo(){if(hi<hist.length-1){hi++;S.note.strokes=hist[hi].slice();updUndo();redraw();touch();}}
+function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1;}
+
+/* ---------- Speichern ---------- */
+let saveT=0;
+const hhmm=()=>new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+const setStatus=t=>{$("status").textContent=t;};
+function touch(){if(!S.note)return;S.note.updated=Date.now();clearTimeout(saveT);saveT=setTimeout(save,700);setStatus("…");}
+function thumb(n){const k=320/W_LOGICAL;return compose(320,220,k,0,n.strokes,n.paper).toDataURL("image/jpeg",.7);}
+async function save(){
+  clearTimeout(saveT);if(!S.note)return;const n=S.note;n.scrollY=S.scrollY;n.thumb=thumb(n);
+  try{await dbPut(n);localStorage.setItem("kritzel.last",n.id);setStatus("Gespeichert "+hhmm());}
+  catch(e){setStatus("Fehler: Speichern klappt nicht");}
+}
+addEventListener("pagehide",()=>{if(saveT)save();});
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&saveT)save();});
+
+/* ---------- Notizen ---------- */
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+async function openNote(n){
+  if(S.note&&saveT)await save();
+  S.note=n;S.scrollY=Math.min(n.scrollY||0,maxScroll());
+  $("title").value=n.title||"";$("paper").value=n.paper;document.title=(n.title||"Ohne Titel")+" · Kritzel Block";
+  $("txtarea").value=n.text||"";
+  resetHist();resize();redraw();setStatus("");
+  try{localStorage.setItem("kritzel.last",n.id);}catch(e){}
+}
+const newNote=()=>({id:uid(),title:"",paper:"dots",text:"",strokes:[],updated:Date.now(),created:Date.now(),scrollY:0,thumb:""});
+async function listNotes(){
+  const all=(await dbAll()).sort((a,b)=>b.updated-a.updated),el=$("list");el.innerHTML="";
+  if(!all.length){el.innerHTML='<p class="empty">Noch nichts da. Das Papier wartet.</p>';return;}
+  for(const n of all){
+    const c=document.createElement("div");c.className="card note"+(S.note&&n.id===S.note.id?" on":"");
+    const d=new Date(n.updated).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"});
+    c.innerHTML=`<img alt="" src="${n.thumb||""}"><div class="meta"><div style="min-width:0"><span class="k"></span><small>Stand ${d}</small></div><button class="dark" aria-label="Notiz löschen">Löschen</button></div>`;
+    c.querySelector(".k").textContent=n.title||"Ohne Titel";
+    c.onclick=async e=>{
+      if(e.target.closest("button")){
+        if(confirm("„"+(n.title||"Ohne Titel")+"“ wirklich löschen? Das geht nicht rückgängig.")){
+          await dbDel(n.id);
+          if(S.note&&S.note.id===n.id){const rest=(await dbAll()).sort((a,b)=>b.updated-a.updated);await openNote(rest[0]||newNote());}
+          listNotes();
+        }return;
+      }
+      await openNote(n);$("dlg").close();
+    };
+    el.appendChild(c);
+  }
+}
+$("notes").onclick=async()=>{if(saveT)await save();await listNotes();$("dlg").showModal();};
+$("close").onclick=()=>$("dlg").close();
+$("newnote").onclick=async()=>{await openNote(newNote());await save();$("dlg").close();$("title").focus();};
+$("title").oninput=e=>{S.note.title=e.target.value;document.title=(S.note.title||"Ohne Titel")+" · Kritzel Block";touch();};
+$("paper").onchange=e=>{S.note.paper=e.target.value;paperBg();touch();};
+$("undo").onclick=undo;$("redo").onclick=redo;
+addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  if((e.metaKey||e.ctrlKey)&&e.key==="z"){e.preventDefault();e.shiftKey?redo():undo();}
+});
+
+/* ---------- Export ---------- */
+$("export").onclick=async()=>{
+  const n=S.note;let k=2;const h0=Math.max(contentBottom()+60,700);
+  while(W_LOGICAL*k*h0*k>16e6&&k>.5)k-=.25;
+  const c=compose(Math.round(W_LOGICAL*k),Math.round(h0*k),k,0,n.strokes,n.paper);
+  const name=(n.title||"Notiz").replace(/[^\wäöüÄÖÜß-]+/g,"-")+".png";
+  c.toBlob(async b=>{
+    const f=new File([b],name,{type:"image/png"});
+    try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:n.title||"Notiz"});return;}}catch(e){if(e.name==="AbortError")return;}
+    const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  },"image/png");
+};
+
+/* ---------- Werkzeugleiste ---------- */
+function buildTools(){
+  const t=$("tools");t.innerHTML="";
+  for(const [id,d] of Object.entries(TOOLS)){
+    const b=document.createElement("button");b.className="tool";b.textContent=d.label;b.setAttribute("aria-pressed",S.tool===id);
+    b.onclick=()=>{S.tool=id;savePrefs();buildTools();buildWidths();};t.appendChild(b);
+  }
+}
+function buildWidths(){
+  const w=$("widths");w.innerHTML="";const d=TOOLS[S.tool];
+  d.base.forEach((v,i)=>{
+    const b=document.createElement("button");b.className="w";b.setAttribute("aria-label","Breite "+(i+1));b.setAttribute("aria-pressed",S.wIdx===i);
+    const px=Math.max(3,Math.min(26,v*d.disp));b.innerHTML=`<i style="width:${px}px;height:${px}px"></i>`;
+    b.onclick=()=>{S.wIdx=i;savePrefs();buildWidths();};w.appendChild(b);
+  });
+  $("colors").style.visibility=S.tool==="erase"||S.tool==="select"?"hidden":"visible";
+  w.style.visibility=S.tool==="select"?"hidden":"visible";
+}
+function buildColors(){
+  const c=$("colors");c.innerHTML="";
+  for(const [hex,name] of COLORS){
+    const b=document.createElement("button");b.className="sw";b.setAttribute("aria-label",name);b.setAttribute("aria-pressed",S.color===hex);
+    b.innerHTML=`<i style="background:${hex}"></i>`;b.onclick=()=>{S.color=hex;savePrefs();buildColors();};c.appendChild(b);
+  }
+}
+function syncFinger(){const b=$("finger");b.setAttribute("aria-pressed",S.finger);b.textContent=S.finger?"Finger: malt":"Finger: scrollt";}
+$("finger").onclick=()=>{S.finger=!S.finger;savePrefs();syncFinger();};
+
+/* ---------- Eingabe: Stift malt, Finger scrollt ---------- */
+let cur=null,ts=null,inertia=0;
+const pos=e=>{const r=inkC.getBoundingClientRect();return[(e.clientX-r.left)/S.scale,(e.clientY-r.top)/S.scale+S.scrollY];};
+const r1=v=>Math.round(v*10)/10;
+function eraseAt(x,y,r){
+  const rr=r+1,keep=S.note.strokes.filter(s=>{
+    if(x<s.bb[0]-rr||x>s.bb[2]+rr||y<s.bb[1]-rr||y>s.bb[3]+rr)return true;
+    const p=s.p,n=p.length/3,hr=r+s.w/2;
+    for(let i=0;i<n;i++){
+      const ax=p[i*3],ay=p[i*3+1],bx=i<n-1?p[i*3+3]:ax,by=i<n-1?p[i*3+4]:ay;
+      const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;let t=l?((x-ax)*dx+(y-ay)*dy)/l:0;t=Math.max(0,Math.min(1,t));
+      if(Math.hypot(x-(ax+t*dx),y-(ay+t*dy))<=hr)return false;
+    }
+    return true;
+  });
+  if(keep.length!==S.note.strokes.length){S.note.strokes=keep;return true;}
+  return false;
+}
+function drawSel(){
+  const el=$("sel");Object.assign(el.style,{display:"block",left:Math.min(cur.x0,cur.x1)+"px",top:Math.min(cur.y0,cur.y1)+"px",width:Math.abs(cur.x1-cur.x0)+"px",height:Math.abs(cur.y1-cur.y0)+"px"});
+}
+function showRing(e,on){
+  const d=TOOLS[S.tool];if(!on||S.tool!=="erase"){ring.style.display="none";return;}
+  const r=stage.getBoundingClientRect(),dia=d.base[S.wIdx]*S.scale;
+  Object.assign(ring.style,{display:"block",width:dia+"px",height:dia+"px",left:e.clientX-r.left+"px",top:e.clientY-r.top+"px"});
+}
+function addPoint(e){
+  const s=cur.s,p=s.p,[x,y]=pos(e),n=p.length/3;
+  let pr=e.pointerType==="mouse"?.5:Math.max(.05,e.pressure||.5);
+  cur.ps=cur.ps==null?pr:cur.ps*.6+pr*.4;
+  if(n&&Math.hypot(x-p[(n-1)*3],y-p[(n-1)*3+1])<.4)return;
+  p.push(r1(x),r1(y),Math.round(cur.ps*100)/100);
+  s.bb=[Math.min(s.bb[0],x),Math.min(s.bb[1],y),Math.max(s.bb[2],x),Math.max(s.bb[3],y)];
+  const j=p.length/3-1;
+  if(j>=2){
+    const i=j-1,tx=(p[i*3]+p[i*3+3])/2,ty=(p[i*3+1]+p[i*3+4])/2;
+    segPath(cur.ctx,s,i,cur.lx,cur.ly,tx,ty);cur.lx=tx;cur.ly=ty;
+  }
+}
+function endStroke(){
+  const s=cur.s,p=s.p,n=p.length/3;
+  if(n===1){cur.ctx.strokeStyle=cur.ctx.fillStyle=s.c;cur.ctx.beginPath();cur.ctx.arc(p[0],p[1],wd(s,0)/2,0,7);cur.ctx.fill();}
+  else if(n>=2){const i=n-1;segPath(cur.ctx,s,i,cur.lx,cur.ly,p[i*3],p[i*3+1]);}
+  const w=s.w;s.bb=[s.bb[0]-w,s.bb[1]-w,s.bb[2]+w,s.bb[3]+w];
+  S.note.strokes.push(s);commit();
+}
+inkC.addEventListener("pointerdown",e=>{
+  const draws=e.pointerType==="pen"||e.pointerType==="mouse"&&e.button===0||e.pointerType==="touch"&&S.finger;
+  if(!draws){
+    if(ts||e.pointerType==="mouse")return;
+    cancelAnimationFrame(inertia);ts={id:e.pointerId,y:e.clientY,t:e.timeStamp,v:0};inkC.setPointerCapture(e.pointerId);return;
+  }
+  if(cur)return;
+  e.preventDefault();inkC.setPointerCapture(e.pointerId);
+  const d=TOOLS[S.tool],[x,y]=pos(e);
+  if(d.type==="select"){
+    const r=stage.getBoundingClientRect();cur={id:e.pointerId,select:true,x0:e.clientX-r.left,y0:e.clientY-r.top,x1:0,y1:0};cur.x1=cur.x0;cur.y1=cur.y0;drawSel();return;
+  }
+  if(d.type==="erase"){cur={id:e.pointerId,erase:true,r:d.base[S.wIdx]/2,hit:false};cur.hit=eraseAt(x,y,cur.r);showRing(e,true);if(cur.hit)redraw();return;}
+  const ctx=d.layer==="mk"?mkX:inkX;applyTransform();
+  cur={id:e.pointerId,ctx,ps:null,lx:x,ly:y,s:{t:d.type,c:S.color,w:d.base[S.wIdx],k:d.k,p:[],bb:[x,y,x,y]}};
+  addPoint(e);
+});
+inkC.addEventListener("pointermove",e=>{
+  if(ts&&e.pointerId===ts.id){
+    const dy=e.clientY-ts.y,dt=Math.max(1,e.timeStamp-ts.t);ts.y=e.clientY;ts.t=e.timeStamp;ts.v=.7*ts.v+.3*(dy/dt);
+    setScroll(S.scrollY-dy/S.scale);return;
+  }
+  if(!cur){if(e.pointerType!=="touch")showRing(e,true);return;}
+  if(e.pointerId!==cur.id)return;
+  e.preventDefault();
+  if(cur.select){const r=stage.getBoundingClientRect();cur.x1=e.clientX-r.left;cur.y1=e.clientY-r.top;drawSel();return;}
+  if(cur.erase){
+    for(const c of (e.getCoalescedEvents?e.getCoalescedEvents():[e])){const[x,y]=pos(c);if(eraseAt(x,y,cur.r))cur.hit=true;}
+    showRing(e,true);if(cur.hit)redraw();return;
+  }
+  for(const c of (e.getCoalescedEvents?e.getCoalescedEvents():[e]))addPoint(c);
+  const bottom=S.scrollY+S.H/S.scale;
+  if(cur.s.bb[3]>bottom-40)redraw();
+});
+function up(e){
+  if(ts&&e.pointerId===ts.id){
+    let v=ts.v;ts=null;
+    const step=()=>{v*=.95;if(Math.abs(v)<.02)return;setScroll(S.scrollY-v*16/S.scale);inertia=requestAnimationFrame(step);};
+    inertia=requestAnimationFrame(step);return;
+  }
+  if(!cur||e.pointerId!==cur.id)return;
+  if(cur.select){const c=cur;cur=null;$("sel").style.display="none";convertRegion(c);return;}
+  if(cur.erase){if(cur.hit)commit();}else endStroke();
+  cur=null;if(e.pointerType==="touch"||e.type==="pointercancel")showRing(e,false);
+}
+inkC.addEventListener("pointerup",up);inkC.addEventListener("pointercancel",up);
+inkC.addEventListener("pointerleave",e=>{if(!cur)showRing(e,false);});
+stage.addEventListener("wheel",e=>{e.preventDefault();setScroll(S.scrollY+e.deltaY/S.scale);},{passive:false});
+stage.addEventListener("contextmenu",e=>e.preventDefault());
+for(const ev of ["gesturestart","gesturechange"])document.addEventListener(ev,e=>e.preventDefault());
+
+/* ---------- Text zur Notiz, Handschrift erkennen ---------- */
+const MODEL="claude-sonnet-5-5";
+function showTxt(on){$("txt").classList.toggle("on",on);$("txtbtn").setAttribute("aria-pressed",on);}
+$("txtbtn").onclick=()=>showTxt(!$("txt").classList.contains("on"));
+$("txtarea").oninput=e=>{S.note.text=e.target.value;touch();};
+$("txtcopy").onclick=async()=>{try{await navigator.clipboard.writeText($("txtarea").value);setStatus("Kopiert");}catch(e){$("txtarea").select();setStatus("Markiert, bitte selbst kopieren");}};
+function getKey(force){
+  let k="";try{k=localStorage.getItem("kritzel.key")||"";}catch(e){}
+  if(!k||force){
+    const v=prompt("Anthropic-API-Schlüssel (sk-ant-…). Er bleibt nur in diesem Browser auf deinem iPad und geht nur an api.anthropic.com. Leer lassen löscht ihn.",k);
+    if(v===null)return "";
+    k=v.trim();try{k?localStorage.setItem("kritzel.key",k):localStorage.removeItem("kritzel.key");}catch(e){}
+  }
+  return k;
+}
+$("txtkey").onclick=()=>{getKey(true);};
+async function convertRegion(c){
+  const sc=S.scale,x0=Math.min(c.x0,c.x1)/sc,x1=Math.max(c.x0,c.x1)/sc,y0=Math.min(c.y0,c.y1)/sc+S.scrollY,y1=Math.max(c.y0,c.y1)/sc+S.scrollY;
+  if(x1-x0<20||y1-y0<20){setStatus("Rahmen zu klein");return;}
+  const hit=S.note.strokes.filter(s=>s.t!=="marker"&&s.bb[2]>=x0&&s.bb[0]<=x1&&s.bb[3]>=y0&&s.bb[1]<=y1);
+  if(!hit.length){setStatus("Da ist nichts zum Erkennen");return;}
+  const key=getKey(false);if(!key){setStatus("Ohne API-Schlüssel kein Text");return;}
+  const k=Math.min(2,1600/Math.max(1,x1-x0)),full=compose(Math.round(W_LOGICAL*k),Math.max(1,Math.round((y1-y0)*k)),k,y0,hit,"blank");
+  const out=document.createElement("canvas");out.width=Math.round((x1-x0)*k);out.height=full.height;
+  const ox=out.getContext("2d");ox.fillStyle="#fff";ox.fillRect(0,0,out.width,out.height);ox.drawImage(full,Math.round(x0*k),0,out.width,out.height,0,0,out.width,out.height);
+  const data=out.toDataURL("image/png").split(",")[1];
+  setStatus("Erkenne Handschrift …");
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:MODEL,max_tokens:1500,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:"image/png",data}},{type:"text",text:"Transkribiere die Handschrift in diesem Bild wortgetreu. Die Sprache ist meist Deutsch. Behalte Absätze, Listen und Aufzählungen bei. Gib ausschließlich den erkannten Text zurück, ohne Einleitung und ohne Erklärung."}]}]})});
+    const j=await r.json();
+    if(!r.ok)throw new Error(j.error&&j.error.message||r.status);
+    const t=(j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("").trim();
+    const ta=$("txtarea");ta.value=(ta.value?ta.value.replace(/\s+$/,"")+"\n\n":"")+t;S.note.text=ta.value;showTxt(true);touch();setStatus("Text erkannt");
+  }catch(e){setStatus("Fehler: "+String(e.message||e).slice(0,70));}
+}
+
+/* ---------- Start ---------- */
+(async()=>{
+  buildTools();buildWidths();buildColors();syncFinger();resize();
+  let notes=[];try{notes=await dbAll();}catch(e){setStatus("Fehler: Speicher nicht verfügbar");}
+  let last=null;try{last=localStorage.getItem("kritzel.last");}catch(e){}
+  const n=notes.find(x=>x.id===last)||notes.sort((a,b)=>b.updated-a.updated)[0]||newNote();
+  await openNote(n);
+  if(!notes.length)save();
+})();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>

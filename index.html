@@ -299,7 +299,7 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 
 /* ---------- Speichern ---------- */
 let saveT=0;
-const VERSION="v17";let newV="";
+const VERSION="v18";let newV="";
 const setStatus=t=>{$("status").textContent=newV?"Update bereit: hier tippen":(t||"");};
 /* Prüft beim Start und beim Zurückkehren, ob es eine neuere Version gibt */
 async function checkUpdate(){
@@ -378,7 +378,7 @@ const fileBase=n=>(n.title||"Notiz").replace(/[^\wäöüÄÖÜß-]+/g,"-");
 $("export").onclick=()=>{
   const n=S.note;let k=2;const h0=Math.max(contentBottom()+60,700);
   while(W_LOGICAL*k*h0*k>16e6&&k>.5)k-=.25;
-  compose(Math.round(W_LOGICAL*k),Math.round(h0*k),k,0,n.strokes,n.paper).toBlob(b=>deliver(b,fileBase(n)+".png",n.title||"Notiz"),"image/png");
+  compose(Math.round(W_LOGICAL*k),Math.round(h0*k),k,0,n.strokes,n.paper).toBlob(b=>deliver(b,fileBase(n)+"-"+n.id.slice(-4)+".png",n.title||"Notiz"),"image/png");
 };
 function makePdf(pages){
   const enc=new TextEncoder(),parts=[],offs=[];let len=0;
@@ -411,7 +411,7 @@ $("pdf").onclick=async()=>{
       pages.push({w,h,bytes:new Uint8Array(await b.arrayBuffer())});
       await new Promise(r=>setTimeout(r));
     }
-    await deliver(makePdf(pages),fileBase(n)+".pdf",n.title||"Notiz");
+    await deliver(makePdf(pages),fileBase(n)+"-"+n.id.slice(-4)+".pdf",n.title||"Notiz");
   }catch(e){setStatus("Fehler: PDF klappt nicht");}
   btn.disabled=false;btn.textContent=lab;
 };

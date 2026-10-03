@@ -5,86 +5,76 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Morse-Generator</title>
 <style>
-  /* Nord: Polar Night, Snow Storm, Frost */
-  :root {
-    --bg:#ECEFF4; --card:#E5E9F0; --fg:#2E3440; --muted:#4C566A; --line:#D8DEE9;
-    --e1:#5E81AC; --e2:#81A1C1; --e3:#88C0D0; --e4:#8FBCBB;
-    --btn:#2E3440; --btn-fg:#ECEFF4; --field:#ECEFF4;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg:#2E3440; --card:#3B4252; --fg:#ECEFF4; --muted:#D8DEE9; --line:#4C566A;
-      --btn:#88C0D0; --btn-fg:#2E3440; --field:#434C5E;
-    }
-  }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 -apple-system,system-ui,sans-serif; }
-  main { max-width:640px; margin:0 auto; padding:32px 16px 40px; }
-  .type { font-family:"American Typewriter","Courier New",ui-monospace,monospace; }
-  h1 { font-size:1.1rem; font-weight:600; letter-spacing:.32em; text-transform:uppercase; margin:0 0 4px; }
-  p.sub { color:var(--muted); margin:0 0 24px; font-size:.9rem; }
-  .card { background:var(--card); border-left:5px solid var(--e1); border-radius:4px; padding:14px 16px 16px; margin-bottom:14px; }
-  .card.c2 { border-left-color:var(--e2); }
-  .card.c3 { border-left-color:var(--e3); }
-  .card.c4 { border-left-color:var(--e4); }
-  label, .lbl { display:block; font-size:.72rem; font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin:0 0 6px; }
-  textarea, input[type=number] {
-    width:100%; padding:10px; font:inherit; color:var(--fg);
-    font-family:"American Typewriter","Courier New",ui-monospace,monospace;
-    background:var(--field); border:1px solid var(--line); border-radius:3px;
-  }
-  textarea:focus, input:focus { outline:2px solid var(--e3); outline-offset:1px; }
-  textarea { min-height:90px; resize:vertical; }
-  .row { display:flex; gap:14px; }
-  .row > div { flex:1; }
-  .out { font-family:"American Typewriter","Courier New",ui-monospace,monospace; font-size:1.3rem; letter-spacing:.1em;
-         word-break:break-word; min-height:2.6em; }
-  .btns { display:flex; gap:12px; margin-top:6px; flex-wrap:wrap; }
-  button { font:inherit; font-size:.8rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
-           padding:11px 20px; border-radius:3px; cursor:pointer;
-           border:1px solid var(--btn); background:var(--btn); color:var(--btn-fg); }
-  button.alt { background:transparent; color:var(--fg); border-color:var(--e1); }
-  button:disabled { opacity:.4; cursor:not-allowed; }
-  #info { color:var(--muted); font-size:.85rem; margin-top:12px; }
-  #info:empty { display:none; }
+/* Designvorlage "Nord": Polar Night, Snow Storm, Frost. Aus dem Skill nord uebernommen. */
+:root{
+  --ink:#2E3440; --ink2:#4C566A; --snow:#ECEFF4; --line:#D8DEE9;
+  --frost1:#8FBCBB; --frost2:#88C0D0; --frost3:#81A1C1; --frost4:#5E81AC;
+  --mono:"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fff}
+body{font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);font-size:14px;line-height:1.38}
+.page{max-width:680px;min-height:100vh;margin:0 auto;padding:28px 28px 20px;display:flex;flex-direction:column}
+header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);padding-bottom:11px;margin-bottom:20px}
+h1{font-size:32px;font-weight:700;letter-spacing:-.4px}
+h1 span{color:var(--frost4)}
+.sub{font-size:12px;color:var(--ink2);text-align:right}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:2.2px;color:var(--frost4);font-weight:700;margin:0 0 8px}
+section{margin-bottom:18px}
+.grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.card{background:var(--snow);border-radius:8px;padding:11px 13px;border-left:5px solid var(--frost3)}
+.card.f1{border-left-color:var(--frost1)}.card.f2{border-left-color:var(--frost2)}.card.f4{border-left-color:var(--frost4)}.card.dark{border-left-color:var(--ink)}
+.k{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--ink);display:block;margin-bottom:6px}
+.k small{font-family:"Avenir Next",Helvetica,sans-serif;font-weight:500;font-size:11px;color:var(--ink2);margin-left:6px}
+textarea,input[type=number]{width:100%;padding:8px 10px;font-family:var(--mono);font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:6px}
+textarea:focus,input:focus{outline:2px solid var(--frost2);outline-offset:1px}
+textarea{min-height:84px;resize:vertical}
+.out{font-family:var(--mono);font-weight:700;font-size:19px;letter-spacing:1.5px;color:var(--ink);word-break:break-word;min-height:2.6em}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-size:13px;font-weight:700;padding:10px 20px;border-radius:8px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--snow)}
+button.alt{background:#fff;color:var(--ink);border-color:var(--frost4)}
+button:disabled{opacity:.4;cursor:not-allowed}
+#info{color:var(--ink2);font-size:12px;margin-top:10px}
+#info:empty{display:none}
+footer{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;font-size:11px;color:var(--ink2);display:flex;justify-content:space-between;gap:12px}
 </style>
 </head>
 <body>
-<main>
-  <h1>Morse-Generator</h1>
-  <p class="sub type">Text rein, Morsecode raus. Anhören oder als WAV speichern.</p>
+<div class="page">
+  <header>
+    <h1>Morse <span>Generator</span></h1>
+    <div class="sub">Text zu Morsecode<br>und Audio</div>
+  </header>
 
-  <div class="card">
-    <label for="text">Text</label>
-    <textarea id="text" spellcheck="false">Hallo Scout</textarea>
-  </div>
+  <section>
+    <h2>Text</h2>
+    <div class="card"><textarea id="text" spellcheck="false">Hallo Scout</textarea></div>
+  </section>
 
-  <div class="card c2">
-    <div class="row">
-      <div>
-        <label for="wpm">Tempo (WPM)</label>
-        <input id="wpm" type="number" min="5" max="40" value="15">
-      </div>
-      <div>
-        <label for="freq">Tonhöhe (Hz)</label>
-        <input id="freq" type="number" min="300" max="1200" step="10" value="600">
-      </div>
+  <section>
+    <h2>Einstellungen</h2>
+    <div class="grid">
+      <div class="card f2"><label class="k" for="wpm">tempo <small>Wörter pro Minute</small></label><input id="wpm" type="number" min="5" max="40" value="15"></div>
+      <div class="card f4"><label class="k" for="freq">tonhöhe <small>Hertz</small></label><input id="freq" type="number" min="300" max="1200" step="10" value="600"></div>
     </div>
-  </div>
+  </section>
 
-  <div class="card c3">
-    <span class="lbl">Morsecode</span>
-    <div class="out" id="morse"></div>
-  </div>
+  <section>
+    <h2>Morsecode</h2>
+    <div class="card f1"><div class="out" id="morse"></div></div>
+  </section>
 
-  <div class="card c4">
+  <section>
+    <h2>Audio</h2>
     <div class="btns">
       <button id="play">Abspielen</button>
-      <button id="download" class="alt">WAV speichern</button>
+      <button id="download" class="alt">Als WAV speichern</button>
     </div>
-    <div id="info" class="type"></div>
-  </div>
-</main>
+    <div id="info"></div>
+  </section>
+
+  <footer><span>WAV, 16 Bit, mono, 44,1 kHz</span><span>Kurz, lang, Pause. Mehr ist es nicht.</span></footer>
+</div>
 
 <script>
 const MORSE = {

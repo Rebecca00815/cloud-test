@@ -166,6 +166,7 @@ dialog header{position:sticky;top:0;background:var(--bg);padding:16px;z-index:1}
     </select>
     <button class="secondary" id="finger" aria-pressed="false">Finger: scrollt</button>
     <button class="secondary" id="export">PNG</button>
+    <button class="secondary" id="pdf">PDF</button>
     <button class="secondary" id="txtbtn" aria-pressed="false">Text</button>
     <button id="notes">Notizen</button>
   </div>
@@ -315,7 +316,7 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 /* ---------- Speichern ---------- */
 let saveT=0;
 const hhmm=()=>new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
-const VERSION="v8";let newV="";
+const VERSION="v9";let newV="";
 const setStatus=t=>{$("status").textContent=newV?"Update "+newV+" bereit: hier tippen":(t?t+" · ":"")+VERSION+" · Diagnose";};
 /* Prüft beim Start und beim Zurückkehren, ob es eine neuere Version gibt */
 async function checkUpdate(){
@@ -384,17 +385,52 @@ addEventListener("keydown",e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==="z"){e.preventDefault();e.shiftKey?redo():undo();}
 });
 
-/* ---------- Export ---------- */
-$("export").onclick=async()=>{
+/* ---------- Export: PNG und PDF, über das Teilen-Menü des iPad ---------- */
+async function deliver(blob,name,title){
+  const f=new File([blob],name,{type:blob.type});
+  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title});return;}}catch(e){if(e.name==="AbortError")return;}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+const fileBase=n=>(n.title||"Notiz").replace(/[^\wäöüÄÖÜß-]+/g,"-");
+$("export").onclick=()=>{
   const n=S.note;let k=2;const h0=Math.max(contentBottom()+60,700);
   while(W_LOGICAL*k*h0*k>16e6&&k>.5)k-=.25;
-  const c=compose(Math.round(W_LOGICAL*k),Math.round(h0*k),k,0,n.strokes,n.paper);
-  const name=(n.title||"Notiz").replace(/[^\wäöüÄÖÜß-]+/g,"-")+".png";
-  c.toBlob(async b=>{
-    const f=new File([b],name,{type:"image/png"});
-    try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:n.title||"Notiz"});return;}}catch(e){if(e.name==="AbortError")return;}
-    const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  },"image/png");
+  compose(Math.round(W_LOGICAL*k),Math.round(h0*k),k,0,n.strokes,n.paper).toBlob(b=>deliver(b,fileBase(n)+".png",n.title||"Notiz"),"image/png");
+};
+function makePdf(pages){
+  const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const push=x=>{const b=typeof x==="string"?enc.encode(x):x;parts.push(b);len+=b.length;};
+  const obj=(id,fn)=>{offs[id]=len;push(id+" 0 obj\n");fn();push("\nendobj\n");};
+  const n=pages.length,total=3+3*n;
+  push("%PDF-1.4\n");
+  obj(1,()=>push("<< /Type /Catalog /Pages 2 0 R >>"));
+  obj(2,()=>push("<< /Type /Pages /Count "+n+" /Kids ["+pages.map((_,i)=>(3+3*i)+" 0 R").join(" ")+"] >>"));
+  pages.forEach((pg,i)=>{
+    const p=3+3*i,c="q 595.28 0 0 841.89 0 0 cm /Im0 Do Q";
+    obj(p,()=>push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 ${p+2} 0 R >> >> /Contents ${p+1} 0 R >>`));
+    obj(p+1,()=>push(`<< /Length ${c.length} >>\nstream\n${c}\nendstream`));
+    obj(p+2,()=>{push(`<< /Type /XObject /Subtype /Image /Width ${pg.w} /Height ${pg.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${pg.bytes.length} >>\nstream\n`);push(pg.bytes);push("\nendstream");});
+  });
+  const xref=len;
+  push("xref\n0 "+total+"\n0000000000 65535 f \n");
+  for(let id=1;id<total;id++)push(String(offs[id]).padStart(10,"0")+" 00000 n \n");
+  push(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  return new Blob(parts,{type:"application/pdf"});
+}
+$("pdf").onclick=async()=>{
+  const n=S.note,btn=$("pdf"),lab=btn.textContent;btn.disabled=true;btn.textContent="PDF …";
+  try{
+    const w=1654,h=Math.round(w*Math.SQRT2),k=w/W_LOGICAL,ph=W_LOGICAL*Math.SQRT2;
+    const count=Math.min(40,Math.max(1,Math.ceil((contentBottom()+60)/ph))),pages=[];
+    for(let i=0;i<count;i++){
+      const c=compose(w,h,k,i*ph,n.strokes,n.paper);
+      const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.9));
+      pages.push({w,h,bytes:new Uint8Array(await b.arrayBuffer())});
+      await new Promise(r=>setTimeout(r));
+    }
+    await deliver(makePdf(pages),fileBase(n)+".pdf",n.title||"Notiz");
+  }catch(e){setStatus("Fehler: PDF klappt nicht");}
+  btn.disabled=false;btn.textContent=lab;
 };
 
 /* ---------- Werkzeugleiste ---------- */

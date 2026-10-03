@@ -334,7 +334,7 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 
 /* ---------- Speichern ---------- */
 let saveT=0;
-const VERSION="v12";let newV="";
+const VERSION="v13";let newV="";
 const setStatus=t=>{$("status").textContent=newV?"Update bereit: hier tippen":(t||"");};
 /* Prüft beim Start und beim Zurückkehren, ob es eine neuere Version gibt */
 async function checkUpdate(){
@@ -510,6 +510,7 @@ function showRing(e,on){
 }
 function addPoint(e){
   const s=cur.s,p=s.p,[x,y]=pos(e),n=p.length/3;
+  cur.hist.push(x,y,e.timeStamp);if(cur.hist.length>18)cur.hist.splice(0,3);
   let pr=e.pointerType==="mouse"?.5:Math.max(.05,e.pressure||.5);
   cur.ps=cur.ps==null?pr:cur.ps*.6+pr*.4;
   if(n&&Math.hypot(x-p[(n-1)*3],y-p[(n-1)*3+1])<.4)return;
@@ -525,14 +526,27 @@ function clearTail(){
   if(!cur||!cur.tb)return;const m=cur.s.w+6,b=cur.tb;
   tipX.clearRect(b[0]-m,b[1]-m,b[2]-b[0]+2*m,b[3]-b[1]+2*m);cur.tb=null;
 }
-function drawTail(){
-  const s=cur.s,p=s.p,n=p.length/3;if(s.t==="marker"||n<2)return;
-  clearTail();const x=p[(n-1)*3],y=p[(n-1)*3+1];
-  tipX.strokeStyle=s.c;tipX.lineCap="round";tipX.lineWidth=wd(s,n-1);
-  tipX.beginPath();tipX.moveTo(cur.lx,cur.ly);tipX.lineTo(x,y);tipX.stroke();
-  cur.tb=[Math.min(cur.lx,x),Math.min(cur.ly,y),Math.max(cur.lx,x),Math.max(cur.ly,y)];
+const PRED_MS=18,PRED_CAP=36;
+function predictPoint(){
+  const h=cur.hist,n=h.length/3;if(n<2)return null;
+  const x=h[(n-1)*3],y=h[(n-1)*3+1],t=h[(n-1)*3+2];
+  let i=n-2;while(i>0&&t-h[i*3+2]<10)i--;
+  const dt=t-h[i*3+2];if(dt<=0)return null;
+  let ax=(x-h[i*3])/dt*PRED_MS,ay=(y-h[i*3+1])/dt*PRED_MS;const l=Math.hypot(ax,ay);
+  if(l>PRED_CAP){ax*=PRED_CAP/l;ay*=PRED_CAP/l;}
+  return[x+ax,y+ay];
 }
-function endStroke(){clearTail();
+function drawTail(pred=true){
+  const s=cur.s,p=s.p,n=p.length/3;if(s.t==="marker"||n<2)return;
+  clearTail();const x=p[(n-1)*3],y=p[(n-1)*3+1],pp=pred?predictPoint():null;
+  tipX.strokeStyle=s.c;tipX.lineCap=tipX.lineJoin="round";tipX.lineWidth=wd(s,n-1);
+  tipX.beginPath();tipX.moveTo(cur.lx,cur.ly);tipX.lineTo(x,y);if(pp)tipX.lineTo(pp[0],pp[1]);tipX.stroke();
+  const ex=pp?pp[0]:x,ey=pp?pp[1]:y;
+  cur.tb=[Math.min(cur.lx,x,ex),Math.min(cur.ly,y,ey),Math.max(cur.lx,x,ex),Math.max(cur.ly,y,ey)];
+  const c=cur;clearTimeout(c.idle);
+  if(pred)c.idle=setTimeout(()=>{if(cur===c)drawTail(false);},45);
+}
+function endStroke(){clearTimeout(cur.idle);clearTail();
   const s=cur.s,p=s.p,n=p.length/3;
   if(n===1){cur.ctx.strokeStyle=cur.ctx.fillStyle=s.c;cur.ctx.beginPath();cur.ctx.arc(p[0],p[1],wd(s,0)/2,0,7);cur.ctx.fill();}
   else if(n>=2){const i=n-1;segPath(cur.ctx,s,i,cur.lx,cur.ly,p[i*3],p[i*3+1]);}
@@ -555,7 +569,7 @@ inkC.addEventListener("pointerdown",e=>{
   }
   if(d.type==="erase"){cur={id:e.pointerId,pt:e.pointerType,erase:true,r:d.base[S.wIdx]/2,hit:false};cur.hit=eraseAt(x,y,cur.r);showRing(e,true);if(cur.hit)redraw();return;}
   const ctx=d.layer==="mk"?mkX:inkX;applyTransform();
-  cur={id:e.pointerId,pt:e.pointerType,ctx,ps:null,lx:x,ly:y,s:{t:d.type,c:S.color,w:d.base[S.wIdx],k:d.k,p:[],bb:[x,y,x,y]}};
+  cur={id:e.pointerId,pt:e.pointerType,ctx,hist:[],idle:0,ps:null,lx:x,ly:y,s:{t:d.type,c:S.color,w:d.base[S.wIdx],k:d.k,p:[],bb:[x,y,x,y]}};
   ctx.strokeStyle=ctx.fillStyle=S.color;ctx.lineCap=ctx.lineJoin="round";
   addPoint(e);
 });

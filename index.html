@@ -160,6 +160,7 @@ dialog header{position:sticky;top:0;background:var(--bg);padding:16px;z-index:1}
     <button class="secondary" id="finger" aria-pressed="false">Finger: scrollt</button>
     <button class="secondary" id="export">PNG</button>
     <button class="secondary" id="pdf">PDF</button>
+    <button class="secondary" id="savenote">Sichern</button>
     <button id="notes">Notizen</button>
   </div>
 </header>
@@ -181,9 +182,10 @@ dialog header{position:sticky;top:0;background:var(--bg);padding:16px;z-index:1}
 <dialog id="dlg">
   <header>
     <h1>Deine <span>Notizen</span></h1>
-    <div class="acts"><button id="newnote">Neue Notiz</button><button class="secondary" id="close">Schließen</button></div>
+    <div class="acts"><button class="secondary" id="backup">Alles sichern</button><button class="secondary" id="restore">Datei laden</button><button id="newnote">Neue Notiz</button><button class="secondary" id="close">Schließen</button></div>
   </header>
-  <div class="dlg"><div class="grid g3" id="list"></div></div>
+  <div class="dlg"><p id="msg" aria-live="polite" style="margin:0 0 12px;color:var(--ink2);font-size:14px;min-height:20px"></p><div class="grid g3" id="list"></div></div>
+  <input type="file" id="restorefile" accept=".json,application/json" hidden>
 </dialog>
 
 <script>
@@ -297,7 +299,7 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 
 /* ---------- Speichern ---------- */
 let saveT=0;
-const VERSION="v15";let newV="";
+const VERSION="v17";let newV="";
 const setStatus=t=>{$("status").textContent=newV?"Update bereit: hier tippen":(t||"");};
 /* Prüft beim Start und beim Zurückkehren, ob es eine neuere Version gibt */
 async function checkUpdate(){
@@ -355,7 +357,7 @@ async function listNotes(){
     el.appendChild(c);
   }
 }
-$("notes").onclick=async()=>{await save(true);await listNotes();$("dlg").showModal();};
+$("notes").onclick=async()=>{msg("");await save(true);await listNotes();$("dlg").showModal();};
 $("close").onclick=()=>$("dlg").close();
 $("newnote").onclick=async()=>{await openNote(newNote());await save();$("dlg").close();$("title").focus();};
 $("title").oninput=e=>{S.note.title=e.target.value;document.title=(S.note.title||"Ohne Titel")+" · Kritzel Block";touch();};
@@ -412,6 +414,53 @@ $("pdf").onclick=async()=>{
     await deliver(makePdf(pages),fileBase(n)+".pdf",n.title||"Notiz");
   }catch(e){setStatus("Fehler: PDF klappt nicht");}
   btn.disabled=false;btn.textContent=lab;
+};
+
+/* ---------- Sicherung: alle Notizen in eine Datei (z. B. nach iCloud Drive) und zurück ---------- */
+const BACKUP_FORMAT="kritzel-sicherung",PAPERS=["dots","blank","lined","grid"];
+const msg=t=>{$("msg").textContent=t;};
+const okStroke=s=>s&&["fine","ball","marker"].includes(s.t)&&typeof s.c==="string"&&/^#[0-9a-f]{6}$/i.test(s.c)&&Number.isFinite(s.w)&&Number.isFinite(s.k)&&Array.isArray(s.p)&&s.p.length>=3&&s.p.length%3===0&&s.p.every(Number.isFinite)&&Array.isArray(s.bb)&&s.bb.length===4&&s.bb.every(Number.isFinite);
+function cleanNote(n){
+  if(!n||typeof n.id!=="string"||!/^[\w-]{1,40}$/.test(n.id)||!Array.isArray(n.strokes))return null;
+  return{id:n.id,title:typeof n.title==="string"?n.title.slice(0,80):"",paper:PAPERS.includes(n.paper)?n.paper:"dots",strokes:n.strokes.filter(okStroke),
+    updated:Number.isFinite(n.updated)?n.updated:Date.now(),created:Number.isFinite(n.created)?n.created:Date.now(),scrollY:Number.isFinite(n.scrollY)?Math.max(0,n.scrollY):0,thumb:""};
+}
+const slim=n=>({id:n.id,title:n.title,paper:n.paper,strokes:n.strokes,updated:n.updated,created:n.created,scrollY:n.scrollY});
+const backupBlob=notes=>new Blob([JSON.stringify({format:BACKUP_FORMAT,version:1,exported:new Date().toISOString(),notes:notes.map(slim)})],{type:"application/json"});
+/* Nur die aktuelle Notiz: gleicher Dateiname bei jedem Sichern, so fragt Dateien "Ersetzen" statt Duplikate anzulegen */
+$("savenote").onclick=async()=>{
+  try{
+    await save(true);const n=S.note;
+    await deliver(backupBlob([n]),fileBase(n)+"-"+n.id.slice(-4)+".kritzel.json",n.title||"Notiz");
+    setStatus("Notiz gesichert");
+  }catch(e){setStatus("Fehler: Sichern klappt nicht");}
+};
+$("backup").onclick=async()=>{
+  msg("Sicherung wird vorbereitet …");
+  try{
+    await save(true);const notes=await dbAll();
+    await deliver(backupBlob(notes),"Kritzel-Alles-"+new Date().toISOString().slice(0,10)+".kritzel.json","Kritzel Block Sicherung");
+    msg(notes.length+(notes.length===1?" Notiz":" Notizen")+" gesichert.");
+  }catch(e){msg("Fehler: Sicherung klappt nicht.");}
+};
+$("restore").onclick=()=>$("restorefile").click();
+$("restorefile").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{
+    const j=JSON.parse(await f.text());
+    if(j.format!==BACKUP_FORMAT||!Array.isArray(j.notes))throw new Error("Format");
+    const incoming=j.notes.map(cleanNote).filter(Boolean);
+    if(!incoming.length){msg("In der Datei sind keine Notizen.");return;}
+    await save(true);
+    const local=new Map((await dbAll()).map(n=>[n.id,n]));
+    const todo=incoming.filter(n=>{const l=local.get(n.id);return !l||n.updated>l.updated;});
+    if(!todo.length){msg("Nichts zu tun: Alle Notizen aus der Datei sind schon in der neuesten Fassung da.");return;}
+    const over=todo.filter(n=>local.has(n.id)).length;
+    if(!confirm(todo.length+" von "+incoming.length+" Notizen werden eingelesen"+(over?", "+over+" davon ersetzen eine ältere Fassung":"")+". Es wird nichts gelöscht. Fortfahren?"))return;
+    for(const n of todo){n.thumb=thumb(n);await dbPut(n);}
+    const cur=S.note&&todo.find(n=>n.id===S.note.id);if(cur)await openNote(cur);
+    await listNotes();msg(todo.length+(todo.length===1?" Notiz":" Notizen")+" eingelesen.");
+  }catch(err){msg("Fehler: Das ist keine gültige Sicherung.");}
 };
 
 /* ---------- Werkzeugleiste ---------- */

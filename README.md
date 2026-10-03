@@ -21,6 +21,13 @@ Notizen mit dem Apple Pencil, im Nord-Look. Eine einzelne Web-App (`index.html`)
 
 Die App selbst wandelt nichts um und kostet nichts. Wer die Schrift transkribiert haben will: Notiz als **PDF** oder **PNG** exportieren und in einem Chat mit Claude hochladen (im bestehenden Claude-Abo enthalten, keine zusätzlichen Kosten) mit der Bitte, sie wortgetreu abzutippen.
 
+## Sichern und auf den Rechner bringen
+
+- **Sichern** (Knopf oben): sichert nur die **aktuelle Notiz** als Datei und öffnet das Teilen-Menü. Dort **In Dateien sichern**, am besten in iCloud Drive, dann liegt sie auch am Rechner. Der Dateiname bleibt für dieselbe Notiz gleich, Dateien fragt dann "Ersetzen" statt eine zweite Kopie anzulegen.
+- **Notizen, Alles sichern:** packt ausnahmsweise alle Notizen in eine Datei.
+- **Notizen, Datei laden:** liest eine solche Datei wieder ein, auch auf einem anderen Gerät. Neuere Fassungen gewinnen, es wird nichts gelöscht, und die App fragt vorher nach.
+- Die Datei ist reines JSON mit den Strichen, keine Bilder. Zum Ansehen am Rechner taugen **PDF** und **PNG**.
+
 ## Grenzen (ehrlich)
 
 - Eine Web-App hat etwas mehr Stiftverzögerung als eine native App und kennt weder Doppeltippen noch Squeeze des Pencil.

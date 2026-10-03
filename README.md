@@ -11,7 +11,7 @@ Notizen mit dem Apple Pencil, im Nord-Look. Eine einzelne Web-App (`index.html`)
 ## Was sie kann
 
 - **Stifte:** Fineliner, Kuli (druckempfindlich), Marker (halbtransparent, liegt unter der Tinte), Radierer (löscht ganze Striche).
-- **Fünf Stiftbreiten** je Stift, **zehn Nord-Farben**.
+- **Fünf Stiftbreiten** je Stift, **zehn Farben**: Nachtgrau, Schiefergrau, Frost-Töne, Navy, Kronen-Rot, Neongelb, Hellgrau.
 - **Papier:** Punkte (Standard), Liniert, Kariert, Blanko. Das Papier bleibt immer hell.
 - **Pencil malt, Finger scrollt.** Schalter „Finger: malt" für den Notfall.
 - Zurück / Vor, endlos lange Seiten, mehrere Notizen, automatisches Speichern auf dem Gerät (IndexedDB).

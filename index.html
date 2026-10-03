@@ -208,8 +208,9 @@ dialog header{position:sticky;top:0;background:var(--bg);padding:16px;z-index:1}
 "use strict";
 const $=id=>document.getElementById(id);
 const W_LOGICAL=1000, SP=36;               // feste logische Seitenbreite, Rasterabstand
-const COLORS=[["#2E3440","Nachtgrau"],["#5E81AC","Frostblau"],["#81A1C1","Hellblau"],["#88C0D0","Eisblau"],["#8FBCBB","Mintgrün"],
-              ["#BF616A","Rot"],["#D08770","Orange"],["#EBCB8B","Gelb"],["#A3BE8C","Grün"],["#B48EAD","Violett"]];
+const COLORS=[["#2E3440","Nachtgrau"],["#4C566A","Schiefergrau"],["#1C3361","Navy"],["#B72D28","Kronen-Rot"],
+              ["#5E81AC","Frostblau"],["#81A1C1","Hellblau"],["#88C0D0","Eisblau"],["#8FBCBB","Mintgrün"],
+              ["#FAFF00","Neongelb"],["#E3E6E8","Hellgrau"]];
 const TOOLS={
   fine:  {label:"Fineliner",type:"fine",  base:[1.2,2.2,3.5,5.5,8],  k:.12,layer:"ink",disp:2.4},
   ball:  {label:"Kuli",     type:"ball",  base:[1.2,2.2,3.5,5.5,8],  k:.55,layer:"ink",disp:2.4},
@@ -316,7 +317,7 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 /* ---------- Speichern ---------- */
 let saveT=0;
 const hhmm=()=>new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
-const VERSION="v9";let newV="";
+const VERSION="v11";let newV="";
 const setStatus=t=>{$("status").textContent=newV?"Update "+newV+" bereit: hier tippen":(t?t+" · ":"")+VERSION+" · Diagnose";};
 /* Prüft beim Start und beim Zurückkehren, ob es eine neuere Version gibt */
 async function checkUpdate(){

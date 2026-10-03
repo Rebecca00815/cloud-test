@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Nord: Polar Night Grund, Frost und Snow Storm fuer Punkt, Strich, Punkt (= R) -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="#2E3440"/>
+  <circle cx="273" cy="512" r="54" fill="#88C0D0"/>
+  <rect x="377" y="458" width="270" height="108" rx="54" fill="#ECEFF4"/>
+  <circle cx="751" cy="512" r="54" fill="#5E81AC"/>
+</svg>

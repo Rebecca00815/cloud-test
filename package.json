@@ -1,0 +1,26 @@
+{
+  "name": "morse-generator",
+  "version": "1.0.0",
+  "description": "Text in Morsecode und Audio umwandeln",
+  "main": "main.js",
+  "author": "Rebecca",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac --arm64 --x64"
+  },
+  "build": {
+    "appId": "de.rebecca.morsegenerator",
+    "productName": "Morse-Generator",
+    "files": ["main.js", "index.html"],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": ["dmg", "zip"],
+      "identity": null
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}

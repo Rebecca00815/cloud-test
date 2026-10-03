@@ -572,7 +572,7 @@ $("diag").onclick=()=>{
   await openNote(n);
   if(!notes.length)save();
 })();
-if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{});
 </script>
 </body>
 </html>

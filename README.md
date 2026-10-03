@@ -19,8 +19,11 @@ Notizen mit dem Apple Pencil, im Nord-Look. Eine einzelne Web-App (`index.html`)
 
 ## Handschrift in Text umwandeln
 
-1. **Scribble (kostenlos, ohne Einrichtung):** Im Feld „Text" (Knopf oben rechts) einfach mit dem Pencil schreiben, iPadOS wandelt es um.
-2. **Auswahl → Text:** Werkzeug „Auswahl → Text", Rahmen um die Handschrift ziehen. Das Bild geht an die Claude-API, der erkannte Text landet im Textfeld. Dafür ist ein eigener Anthropic-API-Schlüssel nötig. Er wird einmal abgefragt und nur im Browser des iPads gespeichert. Kosten pro Erkennung: Cent-Bruchteile.
+Die Handschrift bleibt immer erhalten. Der Text kommt **zusätzlich als Objekt auf die Seite**, kein extra Feld.
+
+1. Werkzeug **Auswahl → Text** wählen, mit dem Pencil einen Rahmen um die Handschrift ziehen. Das Bild geht an die Claude-API, der erkannte Text erscheint direkt unter dem Rahmen. Dafür ist ein eigener Anthropic-API-Schlüssel nötig. Er wird einmal abgefragt und nur im Browser des iPads gespeichert. Ändern oder löschen unter Notizen, **API-Schlüssel**.
+2. Mit demselben Werkzeug: Text **ziehen** verschiebt ihn, **antippen** öffnet ihn zum Bearbeiten (dort funktioniert auch Scribble), eine **leere Stelle antippen** legt einen neuen Text an.
+3. Der Radierer löscht auch Text, Zurück/Vor gilt für Text genauso. Text steht auch in PNG und PDF.
 
 ## Grenzen (ehrlich)
 

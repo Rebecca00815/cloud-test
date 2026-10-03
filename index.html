@@ -120,7 +120,7 @@ select{width:auto;padding:0 10px;font-weight:600;color:var(--ink);background:var
 .sw i{display:block;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--ink2)}
 .sw[aria-pressed="true"]{background:var(--snow2);box-shadow:inset 0 -3px 0 var(--frost4)}
 .sw[aria-pressed="true"] i{outline:2px solid var(--ink);outline-offset:2px}
-#status{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+#status{margin-left:auto;cursor:pointer;padding:12px 4px;font-family:var(--mono);font-size:12px;color:var(--ink2)}
 /* Papier bleibt immer hell, auch im Dunkelmodus (wie echtes Papier) */
 #work{flex:1;display:flex;min-height:0;position:relative}
 #txt{display:none;flex-direction:column;gap:10px;width:340px;padding:16px max(16px,env(safe-area-inset-right)) 16px 16px;border-left:2px solid var(--ink);background:var(--bg);-webkit-user-select:text;user-select:text}
@@ -314,7 +314,8 @@ function updUndo(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1
 /* ---------- Speichern ---------- */
 let saveT=0;
 const hhmm=()=>new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
-const setStatus=t=>{$("status").textContent=t;};
+const VERSION="v5";
+const setStatus=t=>{$("status").textContent=(t?t+" · ":"")+VERSION+" · Diagnose";};
 function touch(){if(!S.note)return;S.note.updated=Date.now();clearTimeout(saveT);saveT=setTimeout(save,700);setStatus("…");}
 function thumb(n){const k=320/W_LOGICAL;return compose(320,220,k,0,n.strokes,n.paper).toDataURL("image/jpeg",.7);}
 async function save(){
@@ -555,17 +556,18 @@ const D={down:0,up:0,cancel:0,move:0,over:0,type:"-",p:0,fing:0};
 const dmap={pointerdown:"down",pointerup:"up",pointercancel:"cancel",pointermove:"move"};
 for(const t of Object.keys(dmap))addEventListener(t,e=>{D[dmap[t]]++;D.type=e.pointerType;D.p=e.pressure||0;},true);
 let hudT=0;
-$("diag").onclick=()=>{
+const toggleDiag=()=>{
   const h=$("hud"),on=h.style.display!=="block";h.style.display=on?"block":"none";clearInterval(hudT);
   if(on){Object.assign(D,{down:0,up:0,cancel:0,move:0,over:0});
     hudT=setInterval(()=>{h.textContent=`Typ: ${D.type}   Druck: ${D.p.toFixed(2)}\nDown ${D.down}  Up ${D.up}  Abbruch ${D.cancel}\nMoves ${D.move}  überlappend ${D.over}\nStriche in Notiz: ${S.note?S.note.strokes.length:0}`;},250);
     $("dlg").close();}
   $("diag").textContent=on?"Diagnose aus":"Diagnose";
 };
+$("diag").onclick=toggleDiag;$("status").onclick=toggleDiag;
 
 /* ---------- Start ---------- */
 (async()=>{
-  buildTools();buildWidths();buildColors();syncFinger();resize();
+  buildTools();buildWidths();buildColors();syncFinger();resize();setStatus("");
   let notes=[];try{notes=await dbAll();}catch(e){setStatus("Fehler: Speicher nicht verfügbar");}
   let last=null;try{last=localStorage.getItem("kritzel.last");}catch(e){}
   const n=notes.find(x=>x.id===last)||notes.sort((a,b)=>b.updated-a.updated)[0]||newNote();

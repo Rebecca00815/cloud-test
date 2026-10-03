@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Morse-Generator</title>
+<style>
+  :root { --bg:#fafaf7; --fg:#1d1d1b; --muted:#6b6b66; --card:#fff; --line:#dcdcd4; --accent:#1d1d1b; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#161614; --fg:#ececE6; --muted:#9a9a92; --card:#1f1f1c; --line:#33332f; --accent:#ececE6; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:32px 16px; }
+  h1 { font-size:1.5rem; margin:0 0 4px; }
+  p.sub { color:var(--muted); margin:0 0 24px; }
+  label { display:block; font-size:.85rem; color:var(--muted); margin:16px 0 4px; }
+  textarea, input[type=number] {
+    width:100%; padding:10px; font:inherit; color:var(--fg);
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+  }
+  textarea { min-height:90px; resize:vertical; }
+  .row { display:flex; gap:12px; }
+  .row > div { flex:1; }
+  .out { font-family:ui-monospace,monospace; font-size:1.2rem; letter-spacing:.08em; word-break:break-word;
+         background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px; min-height:3em; }
+  .btns { display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; }
+  button { font:inherit; padding:10px 18px; border-radius:8px; cursor:pointer;
+           border:1px solid var(--accent); background:var(--accent); color:var(--bg); }
+  button.alt { background:transparent; color:var(--fg); }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  #info { color:var(--muted); font-size:.85rem; margin-top:12px; min-height:1.3em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Morse-Generator</h1>
+  <p class="sub">Text rein, Morsecode raus. Anhören oder als WAV herunterladen.</p>
+
+  <label for="text">Text</label>
+  <textarea id="text" spellcheck="false">Hallo Scout</textarea>
+
+  <div class="row">
+    <div>
+      <label for="wpm">Tempo (Wörter pro Minute)</label>
+      <input id="wpm" type="number" min="5" max="40" value="15">
+    </div>
+    <div>
+      <label for="freq">Tonhöhe (Hz)</label>
+      <input id="freq" type="number" min="300" max="1200" step="10" value="600">
+    </div>
+  </div>
+
+  <label>Morsecode</label>
+  <div class="out" id="morse"></div>
+
+  <div class="btns">
+    <button id="play">Abspielen</button>
+    <button id="download" class="alt">Als WAV herunterladen</button>
+  </div>
+  <div id="info"></div>
+</main>
+
+<script>
+const MORSE = {
+  A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',
+  K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',
+  U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+  '6':'-....','7':'--...','8':'---..','9':'----.',
+  'Ä':'.-.-','Ö':'---.','Ü':'..--','ß':'...--..',
+  '.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--','/':'-..-.',
+  '(':'-.--.',')':'-.--.-','&':'.-...',':':'---...',';':'-.-.-.',
+  '=':'-...-','+':'.-.-.','-':'-....-','_':'..--.-','"':'.-..-.',"'":'.----.','@':'.--.-.'
+};
+
+// Gibt { code, skipped } zurück. Zeichen getrennt durch " ", Wörter durch " / ".
+function toMorse(text) {
+  const skipped = new Set();
+  const words = text.trim().split(/\s+/).filter(Boolean).map(word =>
+    [...word].map(ch => {
+      const c = ch === 'ß' ? 'ß' : ch.toUpperCase();
+      if (MORSE[c]) return MORSE[c];
+      skipped.add(ch);
+      return null;
+    }).filter(Boolean).join(' ')
+  ).filter(Boolean);
+  return { code: words.join(' / '), skipped: [...skipped] };
+}
+
+// Standard-Timing: 1 Einheit = 1200/WPM ms. Punkt 1, Strich 3, Zeichenpause 3, Wortpause 7.
+function synth(code, wpm, freq, rate = 44100) {
+  const unit = Math.round(rate * 1.2 / wpm);
+  const ramp = Math.min(Math.round(rate * 0.005), Math.floor(unit / 2));
+  const parts = [];
+  let total = 0;
+  const tone = n => { parts.push({ tone: true, n }); total += n; };
+  const gap  = n => { parts.push({ tone: false, n }); total += n; };
+
+  const symbols = code.split(' ');
+  symbols.forEach((s, i) => {
+    if (s === '/') { gap(unit * 4); return; }            // 3 (nach Zeichen) + 4 = 7 insgesamt
+    for (let k = 0; k < s.length; k++) {
+      tone(s[k] === '.' ? unit : unit * 3);
+      if (k < s.length - 1) gap(unit);
+    }
+    if (i < symbols.length - 1) gap(unit * 3);
+  });
+
+  const samples = new Int16Array(total + rate / 10);     // 0,1 s Stille am Ende
+  let pos = 0;
+  for (const p of parts) {
+    if (p.tone) {
+      for (let i = 0; i < p.n; i++) {
+        const env = Math.min(1, i / ramp, (p.n - 1 - i) / ramp);
+        samples[pos + i] = Math.sin(2 * Math.PI * freq * i / rate) * env * 0.6 * 32767;
+      }
+    }
+    pos += p.n;
+  }
+  return { samples, rate };
+}
+
+function toWav({ samples, rate }) {
+  const buf = new ArrayBuffer(44 + samples.length * 2);
+  const v = new DataView(buf);
+  const str = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  str(0, 'RIFF'); v.setUint32(4, 36 + samples.length * 2, true);
+  str(8, 'WAVE'); str(12, 'fmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  str(36, 'data'); v.setUint32(40, samples.length * 2, true);
+  new Int16Array(buf, 44).set(samples);
+  return new Uint8Array(buf);
+}
+
+if (typeof document !== 'undefined') {
+  const $ = id => document.getElementById(id);
+  let current = { audio: null, url: null };
+
+  function build() {
+    const { code, skipped } = toMorse($('text').value);
+    const wpm = Math.min(40, Math.max(5, +$('wpm').value || 15));
+    const freq = Math.min(1200, Math.max(300, +$('freq').value || 600));
+    $('morse').textContent = code;
+    $('info').textContent = skipped.length ? 'Nicht übersetzbar, übersprungen: ' + skipped.join(' ') : '';
+    $('play').disabled = $('download').disabled = !code;
+    return { code, wpm, freq };
+  }
+
+  function makeBlob() {
+    const { code, wpm, freq } = build();
+    if (!code) return null;
+    return new Blob([toWav(synth(code, wpm, freq))], { type: 'audio/wav' });
+  }
+
+  $('play').onclick = () => {
+    const blob = makeBlob();
+    if (!blob) return;
+    if (current.audio) current.audio.pause();
+    if (current.url) URL.revokeObjectURL(current.url);
+    current.url = URL.createObjectURL(blob);
+    current.audio = new Audio(current.url);
+    current.audio.play();
+  };
+
+  $('download').onclick = () => {
+    const blob = makeBlob();
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const slug = $('text').value.trim().slice(0, 30).replace(/[^\wäöüß]+/gi, '_') || 'morse';
+    a.download = 'morse_' + slug + '.wav';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  ['text', 'wpm', 'freq'].forEach(id => $(id).addEventListener('input', build));
+  build();
+}
+
+if (typeof module !== 'undefined') module.exports = { toMorse, synth, toWav };
+</script>
+</body>
+</html>

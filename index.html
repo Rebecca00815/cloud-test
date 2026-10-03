@@ -5,42 +5,101 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Morse-Generator</title>
 <style>
-/* Designvorlage "Nord": Polar Night, Snow Storm, Frost. Aus dem Skill nord uebernommen. */
+/* Designvorlage „Nord“ (Rebecca Mahnkopf) für Apps, Websites und Oberflächen.
+   Gleiche Optik wie die Druck-Vorlage (vorlage.html), übersetzt auf den Bildschirm.
+   Tokens unverändert übernehmen, Bausteine nach Bedarf. Dunkel ist die abgeleitete Variante. */
 :root{
-  --ink:#2E3440; --ink2:#4C566A; --snow:#ECEFF4; --line:#D8DEE9;
-  --frost1:#8FBCBB; --frost2:#88C0D0; --frost3:#81A1C1; --frost4:#5E81AC;
+  --ink:#2E3440;   /* Polar Night: Schrift, Linien, dunkle Kästen */
+  --ink2:#4C566A;  /* Polar Night hell: Fließtext in Karten, Untertitel */
+  --snow:#ECEFF4;  /* Snow Storm: Kartenhintergrund, Schrift auf Dunkel */
+  --snow2:#E5E9F0;
+  --frost1:#8FBCBB;--frost2:#88C0D0;--frost3:#81A1C1;--frost4:#5E81AC; /* Frost: Akzente */
+  --line:#D8DEE9;
+  --bg:#fff;
+  --radius:10px;
+  --font:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;
   --mono:"SF Mono",Menlo,monospace;
 }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2E3440; --ink:#ECEFF4; --ink2:#D8DEE9; --snow:#3B4252; --snow2:#434C5E; --line:#4C566A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2E3440; --ink:#ECEFF4; --ink2:#D8DEE9; --snow:#3B4252; --snow2:#434C5E; --line:#4C566A;
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:#fff}
-body{font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);font-size:14px;line-height:1.38}
-.page{max-width:680px;min-height:100vh;margin:0 auto;padding:28px 28px 20px;display:flex;flex-direction:column}
-header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);padding-bottom:11px;margin-bottom:20px}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45}
+.wrap{max-width:960px;margin:0 auto;padding:24px 16px}
+
+/* Kopf: Titel mit zweitem Wort in Frost-Blau, Kontext rechts, kräftige Linie */
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:24px}
 h1{font-size:32px;font-weight:700;letter-spacing:-.4px}
 h1 span{color:var(--frost4)}
-.sub{font-size:12px;color:var(--ink2);text-align:right}
-h2{font-size:11px;text-transform:uppercase;letter-spacing:2.2px;color:var(--frost4);font-weight:700;margin:0 0 8px}
-section{margin-bottom:18px}
-.grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
-.card{background:var(--snow);border-radius:8px;padding:11px 13px;border-left:5px solid var(--frost3)}
+.sub{font-size:13px;color:var(--ink2);text-align:right}
+
+/* Abschnittsüberschrift: klein, VERSALIEN, gesperrt, Frost-Blau */
+h2{font-size:12px;text-transform:uppercase;letter-spacing:1.6px;color:var(--frost4);font-weight:700;margin:0 0 10px}
+section{margin-bottom:24px}
+
+/* Raster und Karten: Snow-Hintergrund, abgerundet, farbige Kante links */
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.card{background:var(--snow);border-radius:var(--radius);padding:12px 16px;border-left:5px solid var(--frost3)}
 .card.f1{border-left-color:var(--frost1)}.card.f2{border-left-color:var(--frost2)}.card.f4{border-left-color:var(--frost4)}.card.dark{border-left-color:var(--ink)}
-.k{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--ink);display:block;margin-bottom:6px}
-.k small{font-family:"Avenir Next",Helvetica,sans-serif;font-weight:500;font-size:11px;color:var(--ink2);margin-left:6px}
-textarea,input[type=number]{width:100%;padding:8px 10px;font-family:var(--mono);font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:6px}
-textarea:focus,input:focus{outline:2px solid var(--frost2);outline-offset:1px}
-textarea{min-height:84px;resize:vertical}
-.out{font-family:var(--mono);font-weight:700;font-size:19px;letter-spacing:1.5px;color:var(--ink);word-break:break-word;min-height:2.6em}
-.btns{display:flex;gap:10px;flex-wrap:wrap}
-button{font:inherit;font-size:13px;font-weight:700;padding:10px 20px;border-radius:8px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--snow)}
-button.alt{background:#fff;color:var(--ink);border-color:var(--frost4)}
+.card p{color:var(--ink2)}
+.card p + p{margin-top:6px}
+.stack > * + *{margin-top:12px}
+
+/* Stichwort in Schreibmaschinenschrift */
+.k{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--ink);display:block;margin-bottom:4px}
+.k small{font-family:var(--font);font-weight:500;font-size:12px;color:var(--ink2);margin-left:6px}
+
+/* Regel-Kasten: dunkel, sparsam */
+.rule{background:#2E3440;color:#ECEFF4;border-radius:var(--radius);padding:12px 16px;font-size:14px;margin-bottom:12px}
+.rule b{color:var(--frost2)}
+
+/* Listen, Checkliste, Tabelle */
+ol,ul{padding-left:20px;color:var(--ink2)} li{margin:2px 0}
+b{color:var(--ink)}
+.check li{list-style:none;position:relative;padding-left:4px}
+.check li::before{content:"";position:absolute;left:-20px;top:4px;width:12px;height:12px;border:1.5px solid var(--frost4);border-radius:3px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--frost4);border-bottom:1.5px solid var(--ink);padding:8px}
+td{padding:8px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+td:first-child{color:var(--ink);font-weight:600}
+
+/* Bedienelemente */
+button,.btn{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:var(--radius);padding:10px 18px;background:var(--frost4);color:#fff}
+button:hover,.btn:hover{background:var(--frost3)}
+button.secondary{background:var(--snow);color:var(--ink);border-left:5px solid var(--frost3);border-radius:var(--radius)}
+button.dark{background:#2E3440;color:#ECEFF4}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--frost2);outline-offset:2px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--snow);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;width:100%}
+label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--frost4);font-weight:700;margin:0 0 4px}
+a{color:var(--frost4)}
+
+/* Fuß: dünne Linie, links Quelle, rechts ein trockener Satz */
+footer{margin-top:32px;border-top:1px solid var(--line);padding-top:8px;font-size:12px;color:var(--ink2);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* App-spezifisch, aus denselben Tokens abgeleitet */
+.wrap{min-height:100vh;display:flex;flex-direction:column}
+textarea{min-height:96px;resize:vertical;font-family:var(--mono)}
+input[type=number]{font-family:var(--mono)}
+button{min-height:44px}
 button:disabled{opacity:.4;cursor:not-allowed}
-#info{color:var(--ink2);font-size:12px;margin-top:10px}
+.out{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:1.5px;color:var(--ink);word-break:break-word;min-height:2.6em}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+#info{color:var(--ink2);font-size:13px;margin-top:10px}
 #info:empty{display:none}
-footer{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;font-size:11px;color:var(--ink2);display:flex;justify-content:space-between;gap:12px}
+footer{margin-top:auto}
 </style>
 </head>
 <body>
-<div class="page">
+<div class="wrap">
   <header>
     <h1>Morse <span>Generator</span></h1>
     <div class="sub">Text zu Morsecode<br>und Audio</div>
@@ -48,14 +107,14 @@ footer{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;font-siz
 
   <section>
     <h2>Text</h2>
-    <div class="card"><textarea id="text" spellcheck="false">Hallo Scout</textarea></div>
+    <textarea id="text" aria-label="Text" spellcheck="false">Hallo Scout</textarea>
   </section>
 
   <section>
     <h2>Einstellungen</h2>
-    <div class="grid">
-      <div class="card f2"><label class="k" for="wpm">tempo <small>Wörter pro Minute</small></label><input id="wpm" type="number" min="5" max="40" value="15"></div>
-      <div class="card f4"><label class="k" for="freq">tonhöhe <small>Hertz</small></label><input id="freq" type="number" min="300" max="1200" step="10" value="600"></div>
+    <div class="grid g2">
+      <div><label for="wpm">Tempo (Wörter pro Minute)</label><input id="wpm" type="number" min="5" max="40" value="15"></div>
+      <div><label for="freq">Tonhöhe (Hertz)</label><input id="freq" type="number" min="300" max="1200" step="10" value="600"></div>
     </div>
   </section>
 
@@ -68,7 +127,7 @@ footer{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;font-siz
     <h2>Audio</h2>
     <div class="btns">
       <button id="play">Abspielen</button>
-      <button id="download" class="alt">Als WAV speichern</button>
+      <button id="download" class="secondary">Als WAV speichern</button>
     </div>
     <div id="info"></div>
   </section>

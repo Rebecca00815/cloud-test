@@ -12,12 +12,19 @@
   "build": {
     "appId": "de.rebecca.morsegenerator",
     "productName": "Morse-Generator",
-    "files": ["main.js", "index.html"],
+    "files": [
+      "main.js",
+      "index.html"
+    ],
     "mac": {
       "category": "public.app-category.utilities",
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "identity": null
-    }
+    },
+    "afterPack": "build/adhoc-sign.js"
   },
   "devDependencies": {
     "electron": "^33.0.0",

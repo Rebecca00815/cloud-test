@@ -33,11 +33,12 @@ Rebecca wollte Wörter in Morsecode und Audio (WAV zum Herunterladen) umwandeln,
 ## Design: Stand
 - Design "minimal", am 10.10.2026 mit dem echten Skill `design-minimal` abgeglichen (SKILL.md und `tokens.css`).
 - Korrigiert: Tokens (`--mid` #6b6b6b, `--faint` #a3a3a3, `--rule` #e2e2e2 statt eigener Grautöne), Schriftfamilie "SB Futura" mit den lokalen Namen aus dem Skill (Futura Light BT), Jost nur als Rückfall, `font-synthesis:none`, Etiketten-Laufweite .28em, Grundschrift 16 px.
-- Aufbau nach den Bausteinen: Kopf mit Etikett, großer Zahl (Tempo, 112 px, das einzige große Element), Untertitel, rechts Tonhöhe als zweites Etikett mit Zahl, schwarze Kopflinie. Abschnitte Text 01, Morsecode 02, Audio 03 mit Haarlinie. Fuß mit schwarzer Linie und zwei Etiketten.
+- Aufbau (zweite Runde, nach Rebeccas "nicht ganz übersichtlich"): zwei Spalten nach Skill. Links breit Text 01 (28 px, das einzige große Element) und Morsecode 02, rechts an einer Haarlinie Tempo 03, Tonhöhe 04, Audio 05. Kopf nur Etikett, Untertitel, Kopflinie. Unter 760 px einspaltig. Die erste Runde hatte das Tempo als riesige Zahl im Kopf, das war die falsche Hierarchie.
+- Futura Light wurde auf dem Mac nicht gefunden (Text sah zu kräftig aus). Jetzt mit allen Namen aus Rebeccas Obsidian-Snippet `minimal.css`, darunter `FuturaBT-Light`. Auf dem Mac bestätigen lassen.
 - Schwarzer Knopf entfernt (Farbfläche), beide Knöpfe als unterstrichene Etiketten. Fokus als Haarlinie statt Kasten. Hinweis kursiv in Grau, Leitwort aufrecht Medium.
 - Morsecode bricht nur noch zwischen Zeichen um (vorher mitten im Zeichen am "-").
 - Icon: weißer Grund, Punkt Strich Punkt eckig in #141414, Haarlinie #e2e2e2. Die Squircle-Außenform bleibt als macOS-Vorgabe (sonst setzt macOS 26 das Icon in einen grauen Rahmen).
-- Fenster 720 × 880 (Mindestgröße 560 × 760), weil der neue Kopf höher ist.
+- Fenster 960 × 720 (Mindestgröße 560 × 640).
 - Vorher gab es Nord-Fassungen (Skill `nord`, inzwischen abgelöst) und eine Minimal-Fassung nach Beschreibung. Nur im Git-Verlauf.
 
 ## Offen

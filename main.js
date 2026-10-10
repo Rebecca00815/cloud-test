@@ -3,10 +3,10 @@ const path = require('path');
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 720,
-    height: 880,
+    width: 960,
+    height: 720,
     minWidth: 560,
-    minHeight: 760,
+    minHeight: 640,
     title: 'Morse-Generator',
     webPreferences: { contextIsolation: true, sandbox: true }
   });

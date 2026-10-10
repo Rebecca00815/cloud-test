@@ -3,7 +3,7 @@ name: Build macOS app
 on:
   workflow_dispatch:
   push:
-    branches: [claude/dreamy-turing-h4ehzp]
+    branches: [main]
 
 jobs:
   build:

@@ -7,13 +7,13 @@ Rebecca wollte Wörter in Morsecode und Audio (WAV zum Herunterladen) umwandeln,
 
 ## Wo liegt was
 - Repo: `Rebecca00815/cloud-test`
-- Branch: `claude/dreamy-turing-h4ehzp` (nicht in `main` gemergt, kein Pull Request)
+- Branch: `main` (am 10.10.2026 aus `claude/dreamy-turing-h4ehzp` übernommen)
 - `index.html`: die komplette App (Oberfläche und Logik, eine Datei)
 - `main.js`: Electron-Fenster (720 × 760), lädt `index.html`
 - `package.json`: Electron und electron-builder, `afterPack` signiert die App ad hoc
 - `build/adhoc-sign.js`, `build/icon.svg`, `build/icon.png`: Notsignatur und Icon
 - `fonts/`: Jost Light und Medium (OFL), Rückfall für Futura
-- `.github/workflows/build-mac.yml`: baut `.dmg` und `.zip` (arm64 und x64) auf einem Mac-Runner, bei Push auf den Branch und manuell
+- `.github/workflows/build-mac.yml`: baut `.dmg` und `.zip` (arm64 und x64) auf einem Mac-Runner, bei Push auf `main` und manuell (Actions, Build macOS app, Run workflow)
 
 ## So kommt Rebecca an die App
 1. github.com, Repo, Reiter Actions, neuesten Lauf öffnen
@@ -44,7 +44,6 @@ Rebecca wollte Wörter in Morsecode und Audio (WAV zum Herunterladen) umwandeln,
 
 ## Offen
 - Ob der Punkt ein Sechzehntel sein soll oder etwas anderes.
-- Entscheiden, ob der Branch in `main` soll (Pull Request nur auf Ansage).
 
 ## Getestet
 - Logik per Node: Übersetzung, Timing auf den Sample genau, gültige WAV-Datei.

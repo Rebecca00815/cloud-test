@@ -14,7 +14,8 @@
     "productName": "Morse-Generator",
     "files": [
       "main.js",
-      "index.html"
+      "index.html",
+      "fonts/*"
     ],
     "mac": {
       "category": "public.app-category.utilities",

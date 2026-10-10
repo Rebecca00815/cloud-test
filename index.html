@@ -5,57 +5,79 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Morse-Generator</title>
 <style>
-/* Nord-Tokens (Skill nord), Oberflaeche auf das Noetigste reduziert. */
+/* Designvorlage "Minimal": weisser Grund, Schwarz, Grau als einzige Farbe, Haarlinien, Futura Light/Medium.
+   Futura Light/Medium wird genutzt, wenn installiert; sonst Jost (Futura-aehnlich, OFL) aus ./fonts. */
+@font-face{font-family:"Minimal";font-weight:300;src:local("Futura Light"),local("Futura-Light"),url("fonts/jost-latin-300-normal.woff2") format("woff2")}
+@font-face{font-family:"Minimal";font-weight:500;src:local("Futura Medium"),local("Futura-Medium"),url("fonts/jost-latin-500-normal.woff2") format("woff2")}
 :root{
-  --ink:#2E3440; --ink2:#4C566A; --snow:#ECEFF4; --line:#D8DEE9;
-  --frost2:#88C0D0; --frost3:#81A1C1; --frost4:#5E81AC;
-  --bg:#fff; --radius:10px;
-  --font:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;
-  --mono:"SF Mono",Menlo,monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root{ --bg:#2E3440; --ink:#ECEFF4; --ink2:#D8DEE9; --snow:#3B4252; --line:#4C566A; }
+  --ink:#141414; --grey:#8c8c8c; --line:#d8d8d8; --bg:#fff;
+  --font:"Minimal","Futura","Jost","Century Gothic","Avenir Next",sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45}
-.wrap{max-width:560px;margin:0 auto;padding:32px 20px}
-h1{font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:24px}
-h1 span{color:var(--frost4)}
-textarea,input{font:inherit;font-family:var(--mono);color:var(--ink);background:var(--snow);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;width:100%}
-textarea{min-height:88px;resize:vertical}
-textarea:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--frost2);outline-offset:2px}
-.row{display:flex;gap:12px;margin:12px 0 0}
-.row label{flex:1;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--frost4);font-weight:700}
-.row input{margin-top:4px;font-size:16px;font-weight:400;text-transform:none;letter-spacing:0}
-.out{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:1.5px;word-break:break-word;min-height:2.6em;margin:24px 0}
-.btns{display:flex;gap:12px;flex-wrap:wrap}
-button{font:inherit;font-weight:600;min-height:44px;padding:10px 18px;border:0;border-radius:var(--radius);cursor:pointer;background:var(--frost4);color:#fff}
-button:hover{background:var(--frost3)}
-button.secondary{background:var(--snow);color:var(--ink)}
-button.secondary:hover{background:var(--line)}
-button:disabled{opacity:.4;cursor:not-allowed}
-#info{color:var(--ink2);font-size:13px;margin-top:12px}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-weight:300;font-size:17px;line-height:1.5}
+.wrap{max-width:680px;margin:0 auto;padding:44px 32px 32px;min-height:100vh;display:flex;flex-direction:column}
+.eyebrow,label,.lbl,footer{font-weight:500;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.eyebrow{padding-bottom:14px;border-bottom:1px solid var(--ink)}
+.row{display:grid;grid-template-columns:150px 1fr;gap:0 24px;padding:26px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.lbl,label{color:var(--grey)}
+textarea,input{font:inherit;color:var(--ink);background:transparent;border:0;border-radius:0;width:100%;outline:none}
+textarea{min-height:64px;resize:none;font-size:22px;line-height:1.4}
+.num{display:flex;align-items:baseline;gap:12px}
+.num input{font-size:56px;font-weight:300;line-height:1;letter-spacing:-.02em;width:3.5ch;-moz-appearance:textfield}
+.num input::-webkit-outer-spin-button,.num input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.num .unit{font-weight:500;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--grey)}
+.out{font-size:32px;letter-spacing:.16em;word-break:break-word;min-height:1.5em}
+.btns{display:flex;gap:28px;flex-wrap:wrap}
+button{font:inherit;font-weight:500;font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;background:none;border:0;border-bottom:1px solid var(--ink);border-radius:0;padding:8px 0;color:var(--ink)}
+button.main{background:var(--ink);color:#fff;border-bottom:0;padding:13px 22px}
+button:hover{color:var(--grey);border-bottom-color:var(--grey)}
+button.main:hover{background:#3a3a3a;color:#fff}
+button:disabled{opacity:.35;cursor:not-allowed}
+textarea:focus-visible,input:focus-visible,button:focus-visible{outline:1px solid var(--ink);outline-offset:6px}
+#info{grid-column:2;color:var(--grey);font-size:14px;margin-top:14px}
 #info:empty{display:none}
+footer{margin-top:auto;padding-top:40px;color:var(--grey)}
+@media (max-width:560px){
+  .wrap{padding:28px 20px}
+  .row{grid-template-columns:1fr;gap:8px}
+  #info{grid-column:1}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Morse <span>Generator</span></h1>
-
-  <textarea id="text" aria-label="Text" spellcheck="false">Hallo Scout</textarea>
+  <div class="eyebrow">Morse-Generator</div>
 
   <div class="row">
-    <label>Tempo (BPM)<input id="bpm" type="number" min="40" max="240" value="120" title="1 Punkt = 1/16 Note"></label>
-    <label>Tonhöhe (Hz)<input id="freq" type="number" min="300" max="1200" step="10" value="600"></label>
+    <label for="text">Text</label>
+    <textarea id="text" spellcheck="false">Hallo Scout</textarea>
   </div>
 
-  <div class="out" id="morse"></div>
-
-  <div class="btns">
-    <button id="play">Abspielen</button>
-    <button id="download" class="secondary">Als WAV speichern</button>
+  <div class="row">
+    <label for="bpm">Tempo</label>
+    <div class="num"><input id="bpm" type="number" min="40" max="240" value="120" title="1 Punkt = 1/16 Note"><span class="unit">BPM</span></div>
   </div>
-  <div id="info"></div>
+
+  <div class="row">
+    <label for="freq">Tonhöhe</label>
+    <div class="num"><input id="freq" type="number" min="300" max="1200" step="10" value="600"><span class="unit">Hz</span></div>
+  </div>
+
+  <div class="row">
+    <span class="lbl">Morsecode</span>
+    <div class="out" id="morse"></div>
+  </div>
+
+  <div class="row">
+    <span class="lbl">Audio</span>
+    <div class="btns">
+      <button id="play" class="main">Abspielen</button>
+      <button id="download">Als WAV speichern</button>
+    </div>
+    <div id="info"></div>
+  </div>
+
+  <footer>WAV · 16 Bit · mono · 44,1 kHz</footer>
 </div>
 
 <script>

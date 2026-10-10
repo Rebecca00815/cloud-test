@@ -1,6 +1,6 @@
 # Handoff: Morse-Generator (Mac-App)
 
-Stand 10.10.2026
+Stand 10.10.2026 (abends)
 
 ## Worum es geht
 Rebecca wollte Wörter in Morsecode und Audio (WAV zum Herunterladen) umwandeln, wie auf morsecodeapp.com. Daraus wurde eine Desktop-App für ihren Mac mini (Apple Silicon).
@@ -29,18 +29,23 @@ Rebecca wollte Wörter in Morsecode und Audio (WAV zum Herunterladen) umwandeln,
 - WAV: 16 Bit, mono, 44,1 kHz, 5 ms Ein- und Ausblenden gegen Knacken.
 - Die App ist nur notsigniert, nicht von Apple beglaubigt (kein Developer-Konto).
 
-## Design: Stand und offener Punkt
-- Aktuell umgesetzt: Design "minimal" (weiß, Schwarz `#141414`, Haarlinien, Futura Light/Medium mit Jost als Rückfall, Grau als einzige Farbe, einfarbiges Icon).
-- Gebaut nur nach der Beschreibung des Skills `design-minimal`. Der Skill war in dieser Sitzung nicht ladbar (Skill-Ordner nicht synchronisiert). Abgleich mit dem echten Skill steht aus.
-- Vorher gab es Nord-Fassungen (Skill `nord`, inzwischen abgelöst) mit Frostblau-Icon. Nur im Git-Verlauf.
+## Design: Stand
+- Design "minimal", am 10.10.2026 mit dem echten Skill `design-minimal` abgeglichen (SKILL.md und `tokens.css`).
+- Korrigiert: Tokens (`--mid` #6b6b6b, `--faint` #a3a3a3, `--rule` #e2e2e2 statt eigener Grautöne), Schriftfamilie "SB Futura" mit den lokalen Namen aus dem Skill (Futura Light BT), Jost nur als Rückfall, `font-synthesis:none`, Etiketten-Laufweite .28em, Grundschrift 16 px.
+- Aufbau nach den Bausteinen: Kopf mit Etikett, großer Zahl (Tempo, 112 px, das einzige große Element), Untertitel, rechts Tonhöhe als zweites Etikett mit Zahl, schwarze Kopflinie. Abschnitte Text 01, Morsecode 02, Audio 03 mit Haarlinie. Fuß mit schwarzer Linie und zwei Etiketten.
+- Schwarzer Knopf entfernt (Farbfläche), beide Knöpfe als unterstrichene Etiketten. Fokus als Haarlinie statt Kasten. Hinweis kursiv in Grau, Leitwort aufrecht Medium.
+- Morsecode bricht nur noch zwischen Zeichen um (vorher mitten im Zeichen am "-").
+- Icon: weißer Grund, Punkt Strich Punkt eckig in #141414, Haarlinie #e2e2e2. Die Squircle-Außenform bleibt als macOS-Vorgabe (sonst setzt macOS 26 das Icon in einen grauen Rahmen).
+- Fenster 720 × 880 (Mindestgröße 560 × 760), weil der neue Kopf höher ist.
+- Vorher gab es Nord-Fassungen (Skill `nord`, inzwischen abgelöst) und eine Minimal-Fassung nach Beschreibung. Nur im Git-Verlauf.
 
 ## Offen
 - Hat sich die neueste Fassung ohne `xattr` öffnen lassen? Das wäre die Bestätigung, dass die Notsignatur wirkt. Rückmeldung von Rebecca fehlt.
-- Design mit dem echten Skill `design-minimal` abgleichen (neue Sitzung starten, Skill laden, App danach vergleichen).
+- Aussehen mit echter Futura Light BT auf dem Mac prüfen (im Test lief Jost).
 - Ob der Punkt ein Sechzehntel sein soll oder etwas anderes.
 - Entscheiden, ob der Branch in `main` soll (Pull Request nur auf Ansage).
 
 ## Getestet
 - Logik per Node: Übersetzung, Timing auf den Sample genau, gültige WAV-Datei.
-- Oberfläche im Browser: Klick, Download, Handybreite.
+- Oberfläche im Browser: Klick, Download, Handybreite (390 px), Fensterbreite (720 px), kein Querscrollen.
 - Nicht getestet: die App selbst auf dem Mac, Ton über Lautsprecher, Aussehen mit echter Futura.

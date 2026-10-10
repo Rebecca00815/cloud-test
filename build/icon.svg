@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <!-- Minimal: Schwarz #141414 und Weiss, Punkt Strich Punkt (= R) -->
-  <rect x="100" y="100" width="824" height="824" rx="185" fill="#141414"/>
-  <circle cx="273" cy="512" r="54" fill="#ffffff"/>
-  <rect x="377" y="458" width="270" height="108" rx="54" fill="#ffffff"/>
-  <circle cx="751" cy="512" r="54" fill="#ffffff"/>
+  <!-- Minimal: Weiss als Material, Schwarz #141414, Haarlinie #e2e2e2. Punkt Strich Punkt (= R), eckig.
+       Aussenform = macOS-Iconraster (824 auf 1024); die Rundung ist Systemvorgabe, nicht Gestaltung. -->
+  <rect x="100.5" y="100.5" width="823" height="823" rx="185" fill="#ffffff" stroke="#e2e2e2" stroke-width="3"/>
+  <rect x="236" y="476" width="72" height="72" fill="#141414"/>
+  <rect x="368" y="476" width="288" height="72" fill="#141414"/>
+  <rect x="716" y="476" width="72" height="72" fill="#141414"/>
 </svg>

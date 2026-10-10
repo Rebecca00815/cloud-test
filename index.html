@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Morse-Generator</title>
+<style>
+/* Designvorlage "Minimal" (Skill design-minimal, tokens.css): weisser Grund, Schwarz, zwei Grautoene, Haarlinien,
+   Futura Light/Medium. Ist Futura Light BT nicht installiert, springt Jost (Futura-aehnlich, OFL) aus ./fonts ein.
+   Raster: Fenster 960, Rand 48, Inhalt 864 = Hauptspalte 1fr + Abstand 64 + Seitenspalte 300 (an Haarlinie).
+   Unter 760 px einspaltig. */
+@font-face{font-family:"SB Futura";font-weight:300;src:local("Futura Light BT"),local("FuturaBT-Light"),local("Futura Lt BT"),url("fonts/jost-latin-300-normal.woff2") format("woff2")}
+@font-face{font-family:"SB Futura";font-weight:300;font-style:italic;src:local("Futura Light Italic"),local("FuturaBT-LightItalic"),url("fonts/jost-latin-300-normal.woff2") format("woff2")}
+@font-face{font-family:"SB Futura";font-weight:500;src:local("Futura-Medium"),local("Futura Medium"),url("fonts/jost-latin-500-normal.woff2") format("woff2")}
+:root{
+  --ink:#141414; --mid:#6b6b6b; --faint:#a3a3a3; --rule:#e2e2e2; --bg:#ffffff;
+  --font:"SB Futura","Futura","Avenir Next",sans-serif;
+  --text:16px; --small:14.5px; --label:11px; --big:28px; --track:.28em;
+  --side:300px; --gutter:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--font);font-weight:300;font-size:var(--text);line-height:1.5;font-synthesis:none}
+b{font-weight:500}
+.wrap{max-width:960px;margin:0 auto;padding:48px 48px 40px;min-height:100vh;display:flex;flex-direction:column}
+.m-etikett,.m-sek-kopf h2,.m-sek-kopf label,button,.m-fuss{font-weight:500;font-size:var(--label);letter-spacing:var(--track);text-transform:uppercase}
+textarea,input{font:inherit;color:var(--ink);background:transparent;border:0;border-radius:0;outline:none}
+input{-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+/* Kopf: Etikett, Untertitel, schwarze Kopflinie */
+.m-kopf{padding-bottom:20px;border-bottom:1px solid var(--ink);margin-bottom:40px}
+.m-unter{font-size:15px;color:var(--mid);margin-top:6px}
+
+/* Zwei Spalten: Haupt (Text, Morsecode), Seite (Einstellungen, Audio) */
+.m-grid{display:grid;grid-template-columns:1fr var(--side);gap:var(--gutter);margin-bottom:40px}
+.m-seite{border-left:1px solid var(--rule);padding-left:40px;font-size:var(--small)}
+
+/* Abschnitt: Etikett, kleine Nummer, Haarlinie, Inhalt */
+.m-sek{margin-bottom:36px}
+.m-sek:last-child{margin-bottom:0}
+.m-sek-kopf{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:14px}
+.m-n{font-weight:500;font-size:var(--label);letter-spacing:.1em;color:var(--faint)}
+textarea{display:block;width:100%;min-height:84px;resize:none;font-size:var(--big);line-height:1.4}
+.out{font-size:22px;letter-spacing:.14em;line-height:1.7;min-height:1.7em}
+.out span{white-space:nowrap}
+
+/* Seitenspalte: Werte */
+.wert{display:flex;align-items:baseline;gap:8px;font-size:22px;line-height:1.2}
+.wert input{font-weight:300;field-sizing:content;min-width:1ch}
+.wert span{font-size:var(--small);color:var(--mid)}
+.wert input:hover{color:var(--mid)}
+.m-klein{color:var(--mid);margin-top:4px}
+.btns{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+button{cursor:pointer;background:none;border:0;border-radius:0;border-bottom:1px solid var(--ink);padding:6px 0;color:var(--ink);font-family:inherit}
+button:hover{color:var(--mid);border-bottom-color:var(--mid)}
+button:disabled{color:var(--faint);border-bottom-color:var(--rule);cursor:not-allowed}
+
+/* Fokus als Haarlinie, nie als Kasten */
+input:focus-visible{box-shadow:0 1px 0 var(--ink)}
+textarea:focus-visible{outline:none}
+.m-sek:focus-within .m-sek-kopf{border-bottom-color:var(--ink)}
+button:focus-visible{outline:none;color:var(--mid);border-bottom-color:var(--mid)}
+.m-hinweis{color:var(--mid);font-style:italic;margin-top:14px;font-size:var(--small)}
+.m-hinweis b{font-style:normal;color:var(--ink)}
+.m-hinweis:empty{display:none}
+
+/* Fuss: Haarlinie Schwarz, zwei Etiketten */
+.m-fuss{margin-top:auto;padding-top:16px;border-top:1px solid var(--ink);display:flex;justify-content:space-between;gap:24px;color:var(--mid)}
+@media (max-width:760px){
+  .m-grid{grid-template-columns:1fr;gap:0}
+  .m-seite{border-left:none;padding-left:0;margin-top:36px}
+}
+@media (max-width:560px){
+  .wrap{padding:32px 24px 28px}
+  .m-fuss{flex-direction:column;gap:6px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="m-kopf">
+    <div class="m-etikett">Morse-Generator</div>
+    <div class="m-unter">Text eingeben, Tempo und Ton wählen, abspielen oder als WAV speichern.</div>
+  </header>
+
+  <div class="m-grid">
+    <main>
+      <section class="m-sek">
+        <div class="m-sek-kopf"><label for="text">Text</label><span class="m-n">01</span></div>
+        <textarea id="text" spellcheck="false">Hallo Scout</textarea>
+        <div class="m-hinweis" id="info"></div>
+      </section>
+
+      <section class="m-sek">
+        <div class="m-sek-kopf"><h2>Morsecode</h2><span class="m-n">02</span></div>
+        <div class="out" id="morse"></div>
+      </section>
+    </main>
+
+    <aside class="m-seite">
+      <section class="m-sek">
+        <div class="m-sek-kopf"><label for="bpm">Tempo</label><span class="m-n">03</span></div>
+        <div class="wert"><input id="bpm" type="number" min="40" max="240" value="120" title="Tempo in BPM, 40 bis 240"><span>BPM</span></div>
+        <div class="m-klein">Ein Punkt ist eine Sechzehntel.</div>
+      </section>
+
+      <section class="m-sek">
+        <div class="m-sek-kopf"><label for="freq">Tonhöhe</label><span class="m-n">04</span></div>
+        <div class="wert"><input id="freq" type="number" min="300" max="1200" step="10" value="600" title="Tonhöhe in Hz, 300 bis 1200"><span>Hz</span></div>
+      </section>
+
+      <section class="m-sek">
+        <div class="m-sek-kopf"><h2>Audio</h2><span class="m-n">05</span></div>
+        <div class="btns">
+          <button id="play">Abspielen</button>
+          <button id="download">Als WAV speichern</button>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="m-fuss"><span>WAV · 16 Bit · mono · 44,1 kHz</span><span>Punkt 1 · Strich 3 · Wortpause 7</span></footer>
+</div>
+
+<script>
+const MORSE = {
+  A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',
+  K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',
+  U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+  '6':'-....','7':'--...','8':'---..','9':'----.',
+  'Ä':'.-.-','Ö':'---.','Ü':'..--','ß':'...--..',
+  '.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--','/':'-..-.',
+  '(':'-.--.',')':'-.--.-','&':'.-...',':':'---...',';':'-.-.-.',
+  '=':'-...-','+':'.-.-.','-':'-....-','_':'..--.-','"':'.-..-.',"'":'.----.','@':'.--.-.'
+};
+
+// Gibt { code, skipped } zurück. Zeichen getrennt durch " ", Wörter durch " / ".
+function toMorse(text) {
+  const skipped = new Set();
+  const words = text.trim().split(/\s+/).filter(Boolean).map(word =>
+    [...word].map(ch => {
+      const c = ch === 'ß' ? 'ß' : ch.toUpperCase();
+      if (MORSE[c]) return MORSE[c];
+      skipped.add(ch);
+      return null;
+    }).filter(Boolean).join(' ')
+  ).filter(Boolean);
+  return { code: words.join(' / '), skipped: [...skipped] };
+}
+
+// Timing: 1 Beat = Viertelnote, 1 Punkt (Einheit) = Sechzehntel, also 4 Punkte pro Beat.
+// Punkt 1, Strich 3, Zeichenpause 3, Wortpause 7 Einheiten.
+function synth(code, bpm, freq, rate = 44100) {
+  const unit = Math.round(rate * 15 / bpm);
+  const ramp = Math.min(Math.round(rate * 0.005), Math.floor(unit / 2));
+  const parts = [];
+  let total = 0;
+  const tone = n => { parts.push({ tone: true, n }); total += n; };
+  const gap  = n => { parts.push({ tone: false, n }); total += n; };
+
+  const symbols = code.split(' ');
+  symbols.forEach((s, i) => {
+    if (s === '/') { gap(unit * 4); return; }            // 3 (nach Zeichen) + 4 = 7 insgesamt
+    for (let k = 0; k < s.length; k++) {
+      tone(s[k] === '.' ? unit : unit * 3);
+      if (k < s.length - 1) gap(unit);
+    }
+    if (i < symbols.length - 1) gap(unit * 3);
+  });
+
+  const samples = new Int16Array(total + rate / 10);     // 0,1 s Stille am Ende
+  let pos = 0;
+  for (const p of parts) {
+    if (p.tone) {
+      for (let i = 0; i < p.n; i++) {
+        const env = Math.min(1, i / ramp, (p.n - 1 - i) / ramp);
+        samples[pos + i] = Math.sin(2 * Math.PI * freq * i / rate) * env * 0.6 * 32767;
+      }
+    }
+    pos += p.n;
+  }
+  return { samples, rate };
+}
+
+function toWav({ samples, rate }) {
+  const buf = new ArrayBuffer(44 + samples.length * 2);
+  const v = new DataView(buf);
+  const str = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  str(0, 'RIFF'); v.setUint32(4, 36 + samples.length * 2, true);
+  str(8, 'WAVE'); str(12, 'fmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  str(36, 'data'); v.setUint32(40, samples.length * 2, true);
+  new Int16Array(buf, 44).set(samples);
+  return new Uint8Array(buf);
+}
+
+if (typeof document !== 'undefined') {
+  const $ = id => document.getElementById(id);
+  let current = { audio: null, url: null };
+
+  function build() {
+    const { code, skipped } = toMorse($('text').value);
+    const bpm = Math.min(240, Math.max(40, +$('bpm').value || 120));
+    const freq = Math.min(1200, Math.max(300, +$('freq').value || 600));
+    // Jedes Zeichen als eigener Block, damit "-" nicht als Trennstrich umbricht.
+    $('morse').replaceChildren(...code.split(' ').flatMap((sym, i) => {
+      const span = document.createElement('span');
+      span.textContent = sym;
+      return i ? [' ', span] : [span];
+    }));
+    $('info').textContent = '';
+    if (skipped.length) {
+      const b = document.createElement('b');
+      b.textContent = 'Übersprungen:';
+      $('info').append(b, ' ' + skipped.join(' ') + ' (nicht übersetzbar)');
+    }
+    $('play').disabled = $('download').disabled = !code;
+    return { code, bpm, freq };
+  }
+
+  function makeBlob() {
+    const { code, bpm, freq } = build();
+    if (!code) return null;
+    return new Blob([toWav(synth(code, bpm, freq))], { type: 'audio/wav' });
+  }
+
+  $('play').onclick = () => {
+    const blob = makeBlob();
+    if (!blob) return;
+    if (current.audio) current.audio.pause();
+    if (current.url) URL.revokeObjectURL(current.url);
+    current.url = URL.createObjectURL(blob);
+    current.audio = new Audio(current.url);
+    current.audio.play();
+  };
+
+  $('download').onclick = () => {
+    const blob = makeBlob();
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const slug = $('text').value.trim().slice(0, 30).replace(/[^\wäöüß]+/gi, '_') || 'morse';
+    a.download = 'morse_' + slug + '.wav';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  ['text', 'bpm', 'freq'].forEach(id => $(id).addEventListener('input', build));
+  build();
+}
+
+if (typeof module !== 'undefined') module.exports = { toMorse, synth, toWav };
+</script>
+</body>
+</html>

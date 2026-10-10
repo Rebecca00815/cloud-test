@@ -20,7 +20,8 @@ Rebecca wollte Wörter in Morsecode und Audio (WAV zum Herunterladen) umwandeln,
 2. Unten bei Artifacts `Morse-Generator-mac` laden und entpacken
 3. `Morse-Generator-1.0.0-arm64.dmg` öffnen, App in Programme ziehen
 4. Alte App vorher beenden und in den Papierkorb ziehen, sonst bleibt die alte Fassung
-5. Erster Start per Rechtsklick, Öffnen. Bei "beschädigt": im Terminal `xattr -cr "/Applications/Morse-Generator.app"` (Terminal braucht dafür die Freigabe unter Datenschutz & Sicherheit, App-Verwaltung)
+5. Erster Start: Doppelklick, Meldung "Apple konnte nicht überprüfen …" mit Fertig schließen, dann Systemeinstellungen, Datenschutz & Sicherheit, ganz unten "Dennoch öffnen". Nur einmal nötig. Rechtsklick und Öffnen reicht seit macOS 15 nicht mehr.
+   Bestätigt am 10.10.2026 (Build Nr. 10): Die Notsignatur wirkt, macOS meldet nicht mehr "beschädigt", `xattr` ist nicht mehr nötig.
 
 ## Entscheidungen
 - Tempo in BPM statt Wörter pro Minute. 1 Beat = Viertelnote, 1 Morsepunkt = Sechzehntel (4 Punkte pro Beat). 120 BPM entspricht etwa 10 WPM. Bereich 40 bis 240, Standard 120. Von Rebecca nicht ausdrücklich bestätigt.
@@ -40,7 +41,6 @@ Rebecca wollte Wörter in Morsecode und Audio (WAV zum Herunterladen) umwandeln,
 - Vorher gab es Nord-Fassungen (Skill `nord`, inzwischen abgelöst) und eine Minimal-Fassung nach Beschreibung. Nur im Git-Verlauf.
 
 ## Offen
-- Hat sich die neueste Fassung ohne `xattr` öffnen lassen? Das wäre die Bestätigung, dass die Notsignatur wirkt. Rückmeldung von Rebecca fehlt.
 - Aussehen mit echter Futura Light BT auf dem Mac prüfen (im Test lief Jost).
 - Ob der Punkt ein Sechzehntel sein soll oder etwas anderes.
 - Entscheiden, ob der Branch in `main` soll (Pull Request nur auf Ansage).

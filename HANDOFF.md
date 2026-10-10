@@ -49,4 +49,4 @@ Rebecca wollte Wörter in Morsecode und Audio (WAV zum Herunterladen) umwandeln,
 ## Getestet
 - Logik per Node: Übersetzung, Timing auf den Sample genau, gültige WAV-Datei.
 - Oberfläche im Browser: Klick, Download, Handybreite (390 px), Fensterbreite (720 px), kein Querscrollen.
-- Nicht getestet: die App selbst auf dem Mac, Ton über Lautsprecher, Aussehen mit echter Futura.
+- Auf dem Mac (Rebecca, 10.10.2026, Build Nr. 12): App startet nach "Dennoch öffnen", Ton und WAV funktionieren, Futura wird angezeigt.
